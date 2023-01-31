@@ -25,15 +25,12 @@ public:
 	void SetVelocity(glm::vec2 velocity) { m_velocity = velocity; }
 	void SetMass(float mass) { m_mass = mass; }
 	void SetOrientation(float orientation) { m_orientation = orientation; }
-	void SetColor(glm::vec4 color) { m_color = color; }
 
 protected:
 	glm::vec2 m_position;
 	glm::vec2 m_velocity;
 	float m_mass;
 	float m_orientation; // 2D so we only need a single float to represent our orientation
-
-	glm::vec4 m_color;
 
 };
 

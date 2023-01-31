@@ -5,6 +5,8 @@
 #include "Input.h"
 #include <vector>
 
+#include <glm/vec2.hpp>
+
 class PhysicsScene;
 class PhysicsObject;
 
@@ -28,6 +30,9 @@ protected:
 	PhysicsScene* m_physicsScene;
 
 	std::vector<PhysicsObject*> m_physicsObjects;
+
+	int m_timeSteps;
+	float rocketDir;
 
 public:
 	void DemoStartUp(int num);

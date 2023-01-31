@@ -4,7 +4,9 @@
 
 //#define NewtonsFirstLaw
 //#define NewtonsSecondLaw
-#define NewtonsThirdLaw
+//#define NewtonsThirdLaw
 
-#define SimulatingCollision
-#define SimulatingRocket
+//#define SimulatingCollision
+//#define SimulatingRocket
+
+#define TestCirclePlaneCollision

@@ -7,6 +7,7 @@
 
 #include "PhysicsScene.h"
 #include "Circle.h"
+#include "Plane.h"
 
 #include <glm/ext.hpp>
 
@@ -30,6 +31,8 @@ bool PhysicsApp::startup() {
 
 	m_physicsScene = new PhysicsScene();
 	m_physicsScene->SetTimeStep(0.01);
+
+	m_timeSteps = 0;
 
 	DemoStartUp(1);
 
@@ -98,7 +101,7 @@ void PhysicsApp::DemoStartUp(int num)
 
 #endif // NewtonsSecondLaw
 #ifdef NewtonsThirdLaw
-	m_physicsScene->SetGravity(glm::vec2(0, 0));  // turn off gravity
+	m_physicsScene->SetGravity(glm::vec2(0));  // turn off gravity
 
 	Circle* ball1 = new Circle(glm::vec2(-10, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
 	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
@@ -106,13 +109,76 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(ball2);
 
-	ball1->ApplyForcetoActor(ball2, glm::vec2(2, 0));
+	ball1->ApplyForcetoActor(ball2, glm::vec2(-2, 0));
 
 #endif // NewtonsThirdLaw
+#ifdef SimulatingCollision
+	m_physicsScene->SetGravity(glm::vec2(0));  // turn off gravity
+
+	Circle* ball1 = new Circle(glm::vec2(-10, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0, 0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(ball2);
+
+	ball1->ApplyForcetoActor(ball2, glm::vec2(-2, 0));
+
+#endif // SimulatingCollision
+#ifdef SimulatingRocket
+	m_physicsScene->SetGravity(glm::vec2(0, 0));  // turn off gravity
+
+	Circle* rocket = new Circle(glm::vec2(0, -50), glm::vec2(0, 0), 1000.0f, 6, glm::vec4(1, 0, 0, 1));
+	rocketDir = 180;
+
+	m_physicsScene->AddActor(rocket);
+
+#endif // SimulatingRocket
+#ifdef TestCirclePlaneCollision
+	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
+	Plane* plane = new Plane(glm::vec2(0, 1), -30);
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(ball2);
+	m_physicsScene->AddActor(plane);
+
+#endif // TestCirclePlaneCollision
 }
 
 void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 {
+#ifdef SimulatingRocket
+	m_timeSteps++;
+
+	if (m_timeSteps <= 4) return;
+
+	Circle* rocket = dynamic_cast<Circle*>(m_physicsScene->GetActor(0));
+	if (rocket != nullptr)
+	{
+		if (input->isKeyDown(aie::INPUT_KEY_A))
+		{
+			rocketDir += 10;
+		}
+		else if (input->isKeyDown(aie::INPUT_KEY_D))
+		{
+			rocketDir += -10;
+		}
+		
+		glm::vec2 exhaustDir = glm::vec2(sin(DegreeToRadian(rocketDir)), cos(DegreeToRadian(rocketDir)));
+
+		rocket->SetMass(rocket->GetMass() - 3);
+		Circle* exhaust = new Circle(glm::vec2(rocket->GetPosition().x + (7 * exhaustDir.x), rocket->GetPosition().y + (7 * exhaustDir.y)), glm::vec2(0, 0), 3.0f, 1.5f, glm::vec4(.4, .4, .4, 1));
+		m_physicsScene->AddActor(exhaust);
+
+		rocket->ApplyForcetoActor(exhaust, glm::vec2(800 * exhaustDir.x, 800 * exhaustDir.y));
+	}
+
+	m_timeSteps = 0;
+
+#endif // SimulatingRocket
+
 }
 
 float PhysicsApp::DegreeToRadian(float degree)

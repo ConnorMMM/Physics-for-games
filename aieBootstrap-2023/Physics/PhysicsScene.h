@@ -14,14 +14,23 @@ public:
 	void RemoveActor(PhysicsObject* actor);
 	void Update(float dt);
 	void Draw();
+	void debugScene();
 
-	static bool Circle2Circle(PhysicsObject* obj1, PhysicsObject* obj2);
+	void CheckForCollision();
+
+	static bool Plane2Plane(PhysicsObject*, PhysicsObject*);
+	static bool Plane2Circle(PhysicsObject*, PhysicsObject*);
+	static bool Circle2Plane(PhysicsObject*, PhysicsObject*);
+	static bool Circle2Circle(PhysicsObject*, PhysicsObject*);
+
 
 	// Getters
 	glm::vec2 GetGravity() 
 		{ return m_gravity; }
 	float GetTimeStep() 
 		{ return m_timeStep; }
+	PhysicsObject* GetActor(int index) 
+		{ return *(m_actors.begin() + index); }
 
 	// Setters
 	void SetGravity(const glm::vec2 gravity)
@@ -33,5 +42,7 @@ private:
 	glm::vec2 m_gravity;
 	float m_timeStep;
 	std::vector<PhysicsObject*> m_actors;
+
+	int SHAPE_COUNT;
 };
 
