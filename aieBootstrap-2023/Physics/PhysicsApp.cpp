@@ -109,7 +109,7 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(ball2);
 
-	ball1->ApplyForcetoActor(ball2, glm::vec2(-2, 0));
+	ball1->ApplyForceToActor(ball2, glm::vec2(-2, 0));
 
 #endif // NewtonsThirdLaw
 #ifdef SimulatingCollision
@@ -121,7 +121,7 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(ball2);
 
-	ball1->ApplyForcetoActor(ball2, glm::vec2(-2, 0));
+	ball1->ApplyForceToActor(ball2, glm::vec2(-4, 0));
 
 #endif // SimulatingCollision
 #ifdef SimulatingRocket
@@ -138,13 +138,25 @@ void PhysicsApp::DemoStartUp(int num)
 
 	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0), 4.0f, 4, glm::vec4(1, 0, 0, 1));
 	Circle* ball2 = new Circle(glm::vec2(10, 0), glm::vec2(0), 4.0f, 4, glm::vec4(0, 1, 0, 1));
-	Plane* plane = new Plane(glm::vec2(0, 1), -30);
+	Plane* plane = new Plane(glm::vec2(0, 1), -30, glm::vec4(1, 0, 0, 1));
 
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(ball2);
 	m_physicsScene->AddActor(plane);
 
 #endif // TestCirclePlaneCollision
+#ifdef LecturesNewtonsCradle
+	m_physicsScene->SetGravity(glm::vec2(0));  // turn off gravity
+
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 5.0f, 4, glm::vec4(1, 0, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(0, 0), glm::vec2(0, 0), 10.0f, 4, glm::vec4(0, 1, 0, 1));
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(ball2);
+
+	ball1->ApplyForce(glm::vec2(100, 0));
+
+#endif // LecturesNewtonsCradle
 }
 
 void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
@@ -172,7 +184,7 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 		Circle* exhaust = new Circle(glm::vec2(rocket->GetPosition().x + (7 * exhaustDir.x), rocket->GetPosition().y + (7 * exhaustDir.y)), glm::vec2(0, 0), 3.0f, 1.5f, glm::vec4(.4, .4, .4, 1));
 		m_physicsScene->AddActor(exhaust);
 
-		rocket->ApplyForcetoActor(exhaust, glm::vec2(800 * exhaustDir.x, 800 * exhaustDir.y));
+		rocket->ApplyForceToActor(exhaust, glm::vec2(800 * exhaustDir.x, 800 * exhaustDir.y));
 	}
 
 	m_timeSteps = 0;

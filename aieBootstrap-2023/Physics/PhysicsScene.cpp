@@ -129,7 +129,7 @@ bool PhysicsScene::Circle2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 		if (intersection > 0 && velocityOutOfPlane < 0)
 		{
 			//set Circle velocity to zero here
-			circle->ApplyForce(-circle->GetVelocity() * circle->GetMass());
+			plane->ResolveCollision(circle);
 			return true;
 		}
 	}
@@ -139,18 +139,17 @@ bool PhysicsScene::Circle2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 bool PhysicsScene::Circle2Circle(PhysicsObject* obj1, PhysicsObject* obj2)
 {
 	// try to cast objects to Circle and Circle
-	Circle* sphere1 = dynamic_cast<Circle*>(obj1);
-	Circle* sphere2 = dynamic_cast<Circle*>(obj2);
+	Circle* circle1 = dynamic_cast<Circle*>(obj1);
+	Circle* circle2 = dynamic_cast<Circle*>(obj2);
 	// if we are successful then test for collision
-	if (sphere1 != nullptr && sphere2 != nullptr)
+	if (circle1 != nullptr && circle2 != nullptr)
 	{
 		// TODO do the necessary math in here
 		// TODO if the Circles touch, set their velocities to zero for now
-		if (glm::distance(sphere1->GetPosition(), sphere2->GetPosition()) <
-			(sphere1->GetRadius() + sphere2->GetRadius()))
+		glm::vec2 dist = circle1->GetPosition() - circle2->GetPosition();
+		if (glm::length(dist) < circle1->GetRadius() + circle2->GetRadius())
 		{
-			sphere1->SetVelocity(glm::vec2(0));
-			sphere2->SetVelocity(glm::vec2(0));
+			circle1->ResolveCollision(circle2);
 			return true;
 		}
 	}

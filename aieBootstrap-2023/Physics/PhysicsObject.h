@@ -11,6 +11,7 @@ class PhysicsObject
 {
 protected:
 	PhysicsObject(ShapeType a_shapeID) : m_shapeID(a_shapeID) {}
+	PhysicsObject(ShapeType a_shapeID, glm::vec4 a_color) : m_shapeID(a_shapeID), m_color(a_color) {}
 
 public:
 	virtual void FixedUpdate(glm::vec2 gravity, float timeStep) = 0;
@@ -19,6 +20,7 @@ public:
 
 	// Getter
 	ShapeType GetShapeID() { return m_shapeID; }
+	virtual float GetKineticEnergy() = 0;
 
 	// Setter
 	void SetColor(glm::vec4 color) { m_color = color; }

@@ -163,7 +163,7 @@ void Rigidbody::ResolveCollision(Rigidbody* actor2)
 
 	float kePre = GetKineticEnergy() + actor2->GetKineticEnergy();
 
-	applyForceToActor(actor2, -force);
+	applyForceToActor(actor2, force);
 
 	float kePost = GetKineticEnergy() + actor2->GetKineticEnergy();
 

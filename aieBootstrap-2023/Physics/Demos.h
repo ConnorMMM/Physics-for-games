@@ -9,4 +9,7 @@
 //#define SimulatingCollision
 //#define SimulatingRocket
 
-#define TestCirclePlaneCollision
+//#define TestCirclePlaneCollision
+
+#define LecturesNewtonsCradle
+#define SymmetricalNewtonsCradle
