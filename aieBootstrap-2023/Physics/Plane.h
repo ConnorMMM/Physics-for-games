@@ -16,6 +16,7 @@ public:
     void Plane::ResolveCollision(Rigidbody* actor2);
 
     virtual float GetKineticEnergy() { return 0; }
+    virtual float GetEnergy() { return 0; }
 
     // Getters
     glm::vec2 GetNormal() { return m_normal; }

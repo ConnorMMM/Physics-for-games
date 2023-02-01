@@ -3,8 +3,9 @@
 
 enum ShapeType {
 	PLANE = 0,
-	CIRCLE
+	CIRCLE,
 	//BOX
+	SHAPE_COUNT
 };
 
 class PhysicsObject
@@ -21,6 +22,7 @@ public:
 	// Getter
 	ShapeType GetShapeID() { return m_shapeID; }
 	virtual float GetKineticEnergy() = 0;
+	virtual float GetEnergy() = 0;
 
 	// Setter
 	void SetColor(glm::vec4 color) { m_color = color; }

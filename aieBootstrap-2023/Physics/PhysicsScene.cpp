@@ -5,12 +5,14 @@
 #include "Demos.h"
 
 #include <glm/glm.hpp>
+#include <iostream>
+
+glm::vec2 PhysicsScene::m_gravity(0, 0);
 
 PhysicsScene::PhysicsScene()
 {
 	m_timeStep = 0.01f;
 	m_gravity = glm::vec2(0);
-	SHAPE_COUNT = 2; // TODO need to change to not be hard coded
 }
 
 PhysicsScene::~PhysicsScene()
@@ -53,6 +55,8 @@ static fn collisionFunctionArray[] =
 
 void PhysicsScene::Update(float dt)
 {
+	std::cout << GetTotalEnergy();
+
 	// update physics at a fixed time step
 	static float accumulatedTime = 0.0f;
 	accumulatedTime += dt;
@@ -67,29 +71,7 @@ void PhysicsScene::Update(float dt)
 		accumulatedTime -= m_timeStep;
 
 #ifndef SimulatingRocket
-		int actorCount = m_actors.size();
-
-		// need to check for collisions against all objects except this one.
-		for (int outer = 0; outer < actorCount - 1; outer++)
-		{
-			for (int inner = outer + 1; inner < actorCount; inner++)
-			{
-				PhysicsObject* object1 = m_actors[outer];
-				PhysicsObject* object2 = m_actors[inner];
-				int shapeId1 = object1->GetShapeID();
-				int shapeId2 = object2->GetShapeID();
-
-				// using function pointers
-				int functionIdx = (shapeId1 * SHAPE_COUNT) + shapeId2;
-				fn collisionFunctionPtr = collisionFunctionArray[functionIdx];
-				if (collisionFunctionPtr != nullptr)
-				{
-					// did a collision occur?
-					collisionFunctionPtr(object1, object2);
-				}
-			}
-		}
-
+		CheckForCollision();
 #endif // !SimulatingRocket
 	}
 }
@@ -99,6 +81,32 @@ void PhysicsScene::Draw()
 	for (auto pActor : m_actors)
 	{
 		pActor->Draw(1);
+	}
+}
+
+void PhysicsScene::CheckForCollision()
+{
+	int actorCount = m_actors.size();
+
+	// need to check for collisions against all objects except this one.
+	for (int outer = 0; outer < actorCount - 1; outer++)
+	{
+		for (int inner = outer + 1; inner < actorCount; inner++)
+		{
+			PhysicsObject* object1 = m_actors[outer];
+			PhysicsObject* object2 = m_actors[inner];
+			int shapeId1 = object1->GetShapeID();
+			int shapeId2 = object2->GetShapeID();
+
+			// using function pointers
+			int functionIdx = (shapeId1 * SHAPE_COUNT) + shapeId2;
+			fn collisionFunctionPtr = collisionFunctionArray[functionIdx];
+			if (collisionFunctionPtr != nullptr)
+			{
+				// did a collision occur?
+				collisionFunctionPtr(object1, object2);
+			}
+		}
 	}
 }
 
@@ -155,4 +163,15 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* obj1, PhysicsObject* obj2)
 	}
 
 	return false;
+}
+
+float PhysicsScene::GetTotalEnergy()
+{
+	float total = 0;
+	for (auto it = m_actors.begin(); it != m_actors.end(); it++)
+	{
+		PhysicsObject* obj = *it;
+		total += obj->GetEnergy();
+	}
+	return total;
 }

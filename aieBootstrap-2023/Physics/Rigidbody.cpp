@@ -1,4 +1,6 @@
 #include "Rigidbody.h"
+#include "PhysicsScene.h"
+
 #include <iostream>
 
 Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, float orientation, float mass) : 
@@ -59,5 +61,12 @@ void Rigidbody::ResolveCollision(Rigidbody* actor2)
 
 float Rigidbody::GetKineticEnergy()
 {
-	return .5f * m_mass * ((m_velocity.x * m_velocity.x) + (m_velocity.y * m_velocity.y));
+	float temp1 = .5f * m_mass * ((m_velocity.x * m_velocity.x) + (m_velocity.y * m_velocity.y));
+	float temp2 = .5f * m_mass * glm::dot(m_velocity, m_velocity);
+	return temp1;
+}
+
+float Rigidbody::GetPotentialEnergy()
+{
+	return -GetMass() * glm::dot(PhysicsScene::GetGravity(), GetPosition());
 }

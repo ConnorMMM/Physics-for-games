@@ -23,9 +23,10 @@ public:
 	static bool Circle2Plane(PhysicsObject*, PhysicsObject*);
 	static bool Circle2Circle(PhysicsObject*, PhysicsObject*);
 
+	float GetTotalEnergy();
 
 	// Getters
-	glm::vec2 GetGravity() 
+	static glm::vec2 GetGravity()
 		{ return m_gravity; }
 	float GetTimeStep() 
 		{ return m_timeStep; }
@@ -38,11 +39,8 @@ public:
 	void SetTimeStep(const float timeStep)
 		{ m_timeStep = timeStep; }
 
-private:
-	glm::vec2 m_gravity;
+protected:
+	static glm::vec2 m_gravity;
 	float m_timeStep;
 	std::vector<PhysicsObject*> m_actors;
-
-	int SHAPE_COUNT;
 };
-

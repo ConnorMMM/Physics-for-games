@@ -11,5 +11,6 @@
 
 //#define TestCirclePlaneCollision
 
-#define LecturesNewtonsCradle
-#define SymmetricalNewtonsCradle
+//#define LecturesNewtonsCradle
+//#define SymmetricalNewtonsCradle
+#define AsymmetricalNewtonsCradle

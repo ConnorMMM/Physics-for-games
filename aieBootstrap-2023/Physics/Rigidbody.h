@@ -15,13 +15,16 @@ public:
 	void ApplyForceToActor(Rigidbody* otherActor, glm::vec2 force);
 
 	void ResolveCollision(Rigidbody* actor2);
+	
+	virtual float GetKineticEnergy();
+	float GetPotentialEnergy();
+	virtual float GetEnergy() { return GetKineticEnergy() + GetPotentialEnergy(); }
 
 	// Getters
 	glm::vec2 GetPosition() { return m_position; }
 	glm::vec2 GetVelocity() { return m_velocity; }
 	float GetMass() { return m_mass; }
 	float GetOrientation() { return m_orientation; }
-	virtual float GetKineticEnergy();
 
 	// Setters
 	void SetPosition(glm::vec2 position) { m_position = position; }
@@ -36,4 +39,3 @@ protected:
 	float m_orientation; // 2D so we only need a single float to represent our orientation
 
 };
-
