@@ -13,7 +13,7 @@ public:
     virtual void Draw(float alpha);
     virtual void ResetPosition();
 
-    void Plane::ResolveCollision(Rigidbody* actor2);
+    void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact);
 
     virtual float GetKineticEnergy() { return 0; }
     virtual float GetEnergy() { return 0; }

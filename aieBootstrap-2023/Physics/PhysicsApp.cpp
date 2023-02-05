@@ -200,7 +200,7 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(plane1);
 	m_physicsScene->AddActor(plane2);
 
-	ball1->ApplyForce(glm::vec2(-98.6, 0));
+	ball1->ApplyForce(glm::vec2(-98.6, 0), ball1->GetPosition());
 
 #endif // AsymmetricalNewtonsCradle
 }

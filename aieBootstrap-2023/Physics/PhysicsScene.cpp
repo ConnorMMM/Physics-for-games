@@ -136,8 +136,10 @@ bool PhysicsScene::Circle2Plane(PhysicsObject* obj1, PhysicsObject* obj2)
 		float velocityOutOfPlane = glm::dot(circle->GetVelocity(), plane->GetNormal());
 		if (intersection > 0 && velocityOutOfPlane < 0)
 		{
+			glm::vec2 contact = circle->GetPosition() + (collisionNormal * -circle->GetRadius());
+
 			//set Circle velocity to zero here
-			plane->ResolveCollision(circle);
+			plane->ResolveCollision(circle, contact);
 			return true;
 		}
 	}
@@ -157,7 +159,7 @@ bool PhysicsScene::Circle2Circle(PhysicsObject* obj1, PhysicsObject* obj2)
 		glm::vec2 dist = circle1->GetPosition() - circle2->GetPosition();
 		if (glm::length(dist) < circle1->GetRadius() + circle2->GetRadius())
 		{
-			circle1->ResolveCollision(circle2);
+			circle1->ResolveCollision(circle2, 0.5f * (circle1->GetPosition() + circle2->GetPosition()));
 			return true;
 		}
 	}
