@@ -3,11 +3,11 @@
 #include <Gizmos.h>
 
 
-Circle::Circle(glm::vec2 position, glm::vec2 velocity, float mass, float radius, glm::vec4 color) :
-    Rigidbody(CIRCLE, position, velocity, 0, mass)
+Circle::Circle(glm::vec2 position, glm::vec2 velocity, float mass, float radius, 
+    glm::vec4 color) : Rigidbody(CIRCLE, position, velocity, 0, mass, color)
 {
     m_radius = radius;
-    m_color = color;
+
     m_moment = 0.5f * mass * radius * radius;
 }
 

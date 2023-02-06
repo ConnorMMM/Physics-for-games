@@ -13,4 +13,6 @@
 
 //#define LecturesNewtonsCradle
 //#define SymmetricalNewtonsCradle
-#define AsymmetricalNewtonsCradle
+//#define AsymmetricalNewtonsCradle
+
+#define FallingOnAPlane

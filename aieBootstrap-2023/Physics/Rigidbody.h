@@ -6,8 +6,8 @@
 class Rigidbody : public PhysicsObject
 {
 public:
-	Rigidbody(ShapeType shapeID, glm::vec2 position,
-		glm::vec2 velocity, float orientation, float mass);
+	Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
+		float orientation, float mass, glm::vec4 color);
 	~Rigidbody();
 
 	virtual void FixedUpdate(glm::vec2 gravity, float timeStep);
@@ -17,12 +17,14 @@ public:
 	
 	void Rigidbody::CalculateSmoothedPosition(float alpha);
 
+	void CalculateAxes();
+
 	virtual float GetKineticEnergy();
 	float GetPotentialEnergy();
 	virtual float GetEnergy() { return GetKineticEnergy() + GetPotentialEnergy(); }
 
 	// Getters
-	glm::vec2 GetPosition() { return m_position; }
+	glm::vec2 GetPosition() const { return m_position; }
 	glm::vec2 GetLastPosition() { return m_lastPosition; }
 	glm::vec2 GetVelocity() { return m_velocity; }
 	float GetMass() { return m_mass; }
@@ -35,6 +37,9 @@ public:
 	glm::vec2 GetSmoothedPosition() { return m_smoothedPosition; }
 	glm::vec2 GetSmoothedLocalX() { return m_smoothedLocalX; }
 	glm::vec2 GetSmoothedLocalY() { return m_smoothedLocalY; }
+
+	glm::vec2 GetLocalX() { return m_localX; }
+	glm::vec2 GetLocalY() { return m_localY; }
 
 	// Setters
 	void SetPosition(glm::vec2 position) { m_position = position; }
@@ -60,5 +65,9 @@ protected:
 	glm::vec2 m_smoothedPosition;
 	glm::vec2 m_smoothedLocalX;
 	glm::vec2 m_smoothedLocalY;
+
+	// store the local x,y axes of the box based on its angle of rotation
+	glm::vec2 m_localX;
+	glm::vec2 m_localY;
 
 };

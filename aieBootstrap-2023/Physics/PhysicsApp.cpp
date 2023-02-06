@@ -7,6 +7,7 @@
 
 #include "PhysicsScene.h"
 #include "Circle.h"
+#include "Box.h"
 #include "Plane.h"
 
 #include <glm/ext.hpp>
@@ -203,6 +204,44 @@ void PhysicsApp::DemoStartUp(int num)
 	ball1->ApplyForce(glm::vec2(-98.6, 0), ball1->GetPosition());
 
 #endif // AsymmetricalNewtonsCradle
+#ifdef FallingOnAPlane
+	m_physicsScene->SetGravity(glm::vec2(0, -9.81));
+
+	Plane* plane1 = new Plane(glm::vec2(0, 1), -40, glm::vec4(1, 0, 0, 1));
+	Plane* plane2 = new Plane(glm::vec2(-1, 0), -90, glm::vec4(1, 0, 0, 1));
+	Plane* plane3 = new Plane(glm::vec2(1, 0), -90, glm::vec4(1, 0, 0, 1));
+
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0, 0), 5.0f, 4, glm::vec4(0, 1, 0, 1));
+	Box* box3 = new Box(glm::vec2(-20, 20), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+
+	Box* box1 = new Box(glm::vec2(0, 0), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 0, 1));
+	Box* box2 = new Box(glm::vec2(20, 0), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+	
+	Box* box4 = new Box(glm::vec2(-40, 20), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+	Box* box5 = new Box(glm::vec2(-40, 0), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+	
+	Box* box6 = new Box(glm::vec2(-60, 20), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+	Box* box7 = new Box(glm::vec2(-60, 0), glm::vec2(0, 0), 5.f, glm::vec2(4, 4), glm::vec4(0, 1, 1, 1));
+
+	m_physicsScene->AddActor(plane1);
+	m_physicsScene->AddActor(plane2);
+	m_physicsScene->AddActor(plane3);
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(box3);
+
+	m_physicsScene->AddActor(box1);
+	m_physicsScene->AddActor(box2);
+
+	m_physicsScene->AddActor(box4);
+	m_physicsScene->AddActor(box5);
+
+	m_physicsScene->AddActor(box6);
+	m_physicsScene->AddActor(box7);
+
+	box2->ApplyForce(glm::vec2(0, 5), glm::vec2(4, 0));
+	box7->ApplyForce(glm::vec2(0, 5), glm::vec2(4, 0));
+
+#endif // FallingOnAPlane
 }
 
 void PhysicsApp::DemoUpdates(aie::Input* input, float dt)

@@ -3,8 +3,8 @@
 
 #include <iostream>
 
-Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, float orientation, float mass) : 
-	PhysicsObject(shapeID)
+Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
+	float orientation, float mass, glm::vec4 color) : PhysicsObject(shapeID, color)
 {
 	m_position = position;
 	m_velocity = velocity;
@@ -22,8 +22,10 @@ void Rigidbody::FixedUpdate(glm::vec2 gravity, float timeStep)
 	m_lastPosition = m_position;
 	m_lastOrientation = m_orientation;
 
+	CalculateAxes();
+
 	m_position += m_velocity * timeStep;
-	ApplyForce(gravity * m_mass * timeStep, GetPosition());
+	ApplyForce(gravity * m_mass * timeStep, glm::vec2(0));
 
 	m_orientation += m_angularVelocity * timeStep;
 }
@@ -79,17 +81,25 @@ void Rigidbody::CalculateSmoothedPosition(float alpha)
 
 	float smoothedOrientation = alpha * m_orientation
 		+ (1 - alpha) * m_lastOrientation;
+
 	float sn = sinf(smoothedOrientation);
 	float cs = cosf(smoothedOrientation);
-	m_smoothedLocalX = glm::vec2(cs, sn);
+
+	m_smoothedLocalX = glm::vec2( cs, sn);
 	m_smoothedLocalY = glm::vec2(-sn, cs);
+}
+
+void Rigidbody::CalculateAxes()
+{
+	float sn = sinf(m_orientation);
+	float cs = cosf(m_orientation);
+	m_localX = glm::vec2(cs, sn);
+	m_localY = glm::vec2(-sn, cs);
 }
 
 float Rigidbody::GetKineticEnergy()
 {
-	float temp1 = .5f * m_mass * ((m_velocity.x * m_velocity.x) + (m_velocity.y * m_velocity.y));
-	float temp2 = .5f * m_mass * glm::dot(m_velocity, m_velocity);
-	return temp1;
+	return .5f * (m_mass * glm::dot(m_velocity, m_velocity) + m_moment * m_angularVelocity * m_angularVelocity);
 }
 
 float Rigidbody::GetPotentialEnergy()
