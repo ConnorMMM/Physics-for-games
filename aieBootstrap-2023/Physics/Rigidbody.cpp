@@ -1,16 +1,22 @@
 #include "Rigidbody.h"
 #include "PhysicsScene.h"
 
+#include "Demos.h"
+
 #include <iostream>
 
 Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
-	float orientation, float mass, glm::vec4 color) : PhysicsObject(shapeID, color)
+	float orientation, float mass, float elasticity, glm::vec4 color) : 
+	PhysicsObject(shapeID, elasticity, color)
 {
 	m_position = position;
 	m_velocity = velocity;
 	m_orientation = orientation;
 	m_mass = mass;
 	m_angularVelocity = 0;
+
+	m_linearDrag = LINEAR_DRAG;
+	m_angularDrag = ANGULAR_DRAG;
 }
 
 Rigidbody::~Rigidbody()
@@ -28,6 +34,18 @@ void Rigidbody::FixedUpdate(glm::vec2 gravity, float timeStep)
 	ApplyForce(gravity * m_mass * timeStep, glm::vec2(0));
 
 	m_orientation += m_angularVelocity * timeStep;
+
+
+	m_velocity -= m_velocity * m_linearDrag * timeStep;
+	m_angularVelocity -= m_angularVelocity * m_angularDrag * timeStep;
+
+	if (length(m_velocity) < MIN_LINEAR_THRESHOLD)
+	{
+		m_velocity = glm::vec2(0, 0);
+	}
+	if (abs(m_angularVelocity) < MIN_ANGULAR_THRESHOLD) {
+		m_angularVelocity = 0;
+	}
 }
 
 void Rigidbody::ApplyForce(glm::vec2 force, glm::vec2 pos)
@@ -64,7 +82,7 @@ void Rigidbody::ResolveCollision(Rigidbody* actor2, glm::vec2 contact,
 		float mass1 = 1.0f / (1.0f / m_mass + (r1 * r1) / m_moment);
 		float mass2 = 1.0f / (1.0f / actor2->m_mass + (r2 * r2) / actor2->m_moment);
 
-		float elasticity = 1;
+		float elasticity = (GetElasticity() + actor2->GetElasticity()) / 2.0f;
 
 		glm::vec2 force = (1.0f + elasticity) * mass1 * mass2 /
 			(mass1 + mass2) * (v1 - v2) * normal;

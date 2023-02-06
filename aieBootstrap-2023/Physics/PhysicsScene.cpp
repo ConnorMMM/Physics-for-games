@@ -288,3 +288,28 @@ float PhysicsScene::GetTotalEnergy()
 	}
 	return total;
 }
+
+void PhysicsScene::SetActorsLinearDrag(float linearDrag)
+{
+	for each (PhysicsObject* actor in m_actors)
+	{
+		if (actor->GetShapeID() != 0) 
+		{
+			Rigidbody* rigidbody = dynamic_cast<Rigidbody*>(actor);
+			rigidbody->SetLinearDrag(linearDrag);
+		}
+	}
+
+}
+
+void PhysicsScene::SetActorsAngularDrag(float angularDrag)
+{
+	for each (PhysicsObject * actor in m_actors)
+	{
+		if (actor->GetShapeID() != 0)
+		{
+			Rigidbody* rigidbody = dynamic_cast<Rigidbody*>(actor);
+			rigidbody->SetAngularDrag(angularDrag);
+		}
+	}
+}

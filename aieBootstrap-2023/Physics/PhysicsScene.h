@@ -43,6 +43,8 @@ public:
 		{ m_gravity = gravity; }
 	void SetTimeStep(const float timeStep)
 		{ m_timeStep = timeStep; }
+	void SetActorsLinearDrag(float linearDrag);
+	void SetActorsAngularDrag(float angularDrag);
 
 protected:
 	static glm::vec2 m_gravity;

@@ -5,8 +5,10 @@ class Circle : public Rigidbody
 {
 public:
 	//Circle();
-	Circle(glm::vec2 position, glm::vec2 velocity, 
-		float mass, float radius, glm::vec4 color);
+	Circle(glm::vec2 position, glm::vec2 velocity, float mass,
+		float radius, glm::vec4 color);
+	Circle(glm::vec2 position, glm::vec2 velocity, float mass, 
+		float radius, float elasticity, glm::vec4 color);
 	~Circle();
 
 	virtual void Draw(float alpha);

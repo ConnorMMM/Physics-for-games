@@ -7,7 +7,7 @@ class Rigidbody : public PhysicsObject
 {
 public:
 	Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
-		float orientation, float mass, glm::vec4 color);
+		float orientation, float mass, float elasticity, glm::vec4 color);
 	~Rigidbody();
 
 	virtual void FixedUpdate(glm::vec2 gravity, float timeStep);
@@ -41,6 +41,9 @@ public:
 	glm::vec2 GetLocalX() { return m_localX; }
 	glm::vec2 GetLocalY() { return m_localY; }
 
+	float GetLinearDrag() { return m_linearDrag; }
+	float GetAngularDrag() { return m_angularDrag; }
+
 	// Setters
 	void SetPosition(glm::vec2 position) { m_position = position; }
 	void SetVelocity(glm::vec2 velocity) { m_velocity = velocity; }
@@ -49,6 +52,9 @@ public:
 	void SetOrientation(float orientation) { m_orientation = orientation; }
 	void SetAngularVelocity(float angularVelocity) { m_angularVelocity = angularVelocity; }
 	void SetMoment(float moment) { m_moment = moment; }
+
+	void SetLinearDrag(float linearDrag) { m_linearDrag = linearDrag; }
+	void SetAngularDrag(float angularDrag) { m_angularDrag = angularDrag; }
 
 protected:
 	glm::vec2 m_position;
@@ -69,5 +75,8 @@ protected:
 	// store the local x,y axes of the box based on its angle of rotation
 	glm::vec2 m_localX;
 	glm::vec2 m_localY;
+
+	float m_linearDrag;
+	float m_angularDrag;
 
 };

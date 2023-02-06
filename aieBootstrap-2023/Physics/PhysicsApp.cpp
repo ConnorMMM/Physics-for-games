@@ -7,6 +7,7 @@
 
 #include "PhysicsScene.h"
 #include "Circle.h"
+#include "CueBall.h"
 #include "Box.h"
 #include "Plane.h"
 
@@ -242,6 +243,60 @@ void PhysicsApp::DemoStartUp(int num)
 	box7->ApplyForce(glm::vec2(0, 5), glm::vec2(4, 0));
 
 #endif // FallingOnAPlane
+#ifdef BounceToAStop
+	m_physicsScene->SetGravity(glm::vec2(0, -9.81));
+
+	Plane* plane1 = new Plane(glm::vec2(0, 1), -40, 0.3f, glm::vec4(1, 0, 0, 1));
+
+	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0), 3.0f, 4, 0.3f, glm::vec4(0, 1, 0, 1));
+	Box* box1 = new Box(glm::vec2(0), glm::vec2(0), 5.f, glm::vec2(4, 4), 0.3f, glm::vec4(0, 1, 0, 1));
+
+	m_physicsScene->AddActor(plane1);
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(box1);
+
+#endif // BounceToAStop
+#ifdef SetDreassingAPoolTable
+	m_physicsScene->SetGravity(glm::vec2(0));
+
+	//Walls
+	Plane* plane1 = new Plane(glm::vec2( 0,  1), -40, 0.6f, glm::vec4(1, 0, 0, 1));
+	Plane* plane2 = new Plane(glm::vec2( 0, -1), -40, 0.6f, glm::vec4(1, 0, 0, 1));
+	Plane* plane3 = new Plane(glm::vec2( 1,  0), -80, 0.6f, glm::vec4(1, 0, 0, 1));
+	Plane* plane4 = new Plane(glm::vec2(-1,  0), -80, 0.6f, glm::vec4(1, 0, 0, 1));
+	
+	CueBall* cueBall  = new CueBall(glm::vec2(40, 0),  glm::vec2(0), 3.0f, 3.4f, 0.8f);
+
+	Circle* billiardBall1  = new Circle(glm::vec2(-30,  0   ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall2  = new Circle(glm::vec2(-37,  4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall3  = new Circle(glm::vec2(-37, -4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall4  = new Circle(glm::vec2(-44,  8.5f),  glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall5  = new Circle(glm::vec2(-44,  0   ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall6  = new Circle(glm::vec2(-44, -8.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall7  = new Circle(glm::vec2(-51,  13  ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall8  = new Circle(glm::vec2(-51,  4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall9  = new Circle(glm::vec2(-51, -4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall10 = new Circle(glm::vec2(-51, -13  ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+
+	m_physicsScene->AddActor(cueBall);
+
+	m_physicsScene->AddActor(plane1);
+	m_physicsScene->AddActor(plane2);
+	m_physicsScene->AddActor(plane3);
+	m_physicsScene->AddActor(plane4);
+
+	m_physicsScene->AddActor(billiardBall1);
+	m_physicsScene->AddActor(billiardBall2);
+	m_physicsScene->AddActor(billiardBall3);
+	m_physicsScene->AddActor(billiardBall4);
+	m_physicsScene->AddActor(billiardBall5);
+	m_physicsScene->AddActor(billiardBall6);
+	m_physicsScene->AddActor(billiardBall7);
+	m_physicsScene->AddActor(billiardBall8);
+	m_physicsScene->AddActor(billiardBall9);
+	m_physicsScene->AddActor(billiardBall10);
+
+#endif // SetDreassingAPoolTable
 }
 
 void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
@@ -275,6 +330,42 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 	m_timeSteps = 0;
 
 #endif // SimulatingRocket
+
+#ifdef SetDreassingAPoolTable
+	//for (int i = 0; i < m_physicsScene->)
+	//{
+	//
+	//}
+
+	CueBall* cue = dynamic_cast<CueBall*>(m_physicsScene->GetActor(0));
+	if (cue != nullptr && cue->GetVelocity() == glm::vec2(0))
+	{
+		glm::vec2 force = glm::vec2(0);
+
+		if (input->isKeyDown(aie::INPUT_KEY_A))
+		{
+			force.x += -400;
+		}
+		if (input->isKeyDown(aie::INPUT_KEY_D))
+		{
+			force.x += 400;
+		}
+
+
+		if (input->isKeyDown(aie::INPUT_KEY_W))
+		{
+			force.y += 400;
+		}
+		
+		if (input->isKeyDown(aie::INPUT_KEY_S))
+		{
+			force.y += -400;
+		}
+		
+
+		cue->ApplyForce(force, glm::vec2(0));
+	}
+#endif // SetDreassingAPoolTable
 
 }
 

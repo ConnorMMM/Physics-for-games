@@ -4,7 +4,16 @@
 
 
 Circle::Circle(glm::vec2 position, glm::vec2 velocity, float mass, float radius, 
-    glm::vec4 color) : Rigidbody(CIRCLE, position, velocity, 0, mass, color)
+    glm::vec4 color) : Rigidbody(CIRCLE, position, velocity, 0, mass, 1, color)
+{
+    m_radius = radius;
+
+    m_moment = 0.5f * mass * radius * radius;
+}
+
+Circle::Circle(glm::vec2 position, glm::vec2 velocity, float mass, float radius,
+    float elasticity, glm::vec4 color) : 
+    Rigidbody(CIRCLE, position, velocity, 0, mass, elasticity, color)
 {
     m_radius = radius;
 

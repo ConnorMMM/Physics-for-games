@@ -3,11 +3,20 @@
 #include <Gizmos.h>
 
 Box::Box(glm::vec2 position, glm::vec2 velocity, float mass, glm::vec2 extents, 
-    glm::vec4 color) : Rigidbody(BOX, position, velocity, 0, mass, color)
+    glm::vec4 color) : Rigidbody(BOX, position, velocity, 0, mass, 1, color)
 {
     m_extents = extents;
 
     m_moment = 0.5f * mass * GetWidth() * GetHeight();
+}
+
+Box::Box(glm::vec2 position, glm::vec2 velocity, float mass, glm::vec2 extents,
+	float elasticity, glm::vec4 color) : 
+	Rigidbody(BOX, position, velocity, 0, mass, elasticity, color)
+{
+	m_extents = extents;
+
+	m_moment = 0.5f * mass * GetWidth() * GetHeight();
 }
 
 Box::~Box()
