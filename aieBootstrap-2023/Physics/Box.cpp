@@ -19,6 +19,15 @@ Box::Box(glm::vec2 position, glm::vec2 velocity, float mass, glm::vec2 extents,
 	m_moment = 0.5f * mass * GetWidth() * GetHeight();
 }
 
+Box::Box(glm::vec2 position, glm::vec2 velocity, float orientation, float mass, glm::vec2 extents,
+	float elasticity, glm::vec4 color) :
+	Rigidbody(BOX, position, velocity, orientation, mass, elasticity, color)
+{
+	m_extents = extents;
+
+	m_moment = 0.5f * mass * GetWidth() * GetHeight();
+}
+
 Box::~Box()
 {
 }

@@ -249,11 +249,13 @@ void PhysicsApp::DemoStartUp(int num)
 	Plane* plane1 = new Plane(glm::vec2(0, 1), -40, 0.3f, glm::vec4(1, 0, 0, 1));
 
 	Circle* ball1 = new Circle(glm::vec2(-20, 0), glm::vec2(0), 3.0f, 4, 0.3f, glm::vec4(0, 1, 0, 1));
-	Box* box1 = new Box(glm::vec2(0), glm::vec2(0), 5.f, glm::vec2(4, 4), 0.3f, glm::vec4(0, 1, 0, 1));
+	Box* box1 = new Box(glm::vec2(0), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(4, 4), 0.3f, glm::vec4(0, 1, 0, 1));
+	Box* box2 = new Box(glm::vec2(0, 12), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(4, 4), 0.3f, glm::vec4(0, 1, 0, 1));
 
 	m_physicsScene->AddActor(plane1);
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(box1);
+	m_physicsScene->AddActor(box2);
 
 #endif // BounceToAStop
 #ifdef SetDreassingAPoolTable
@@ -297,6 +299,8 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(billiardBall10);
 
 #endif // SetDreassingAPoolTable
+
+
 }
 
 void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
@@ -337,33 +341,33 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 	//
 	//}
 
-	CueBall* cue = dynamic_cast<CueBall*>(m_physicsScene->GetActor(0));
-	if (cue != nullptr && cue->GetVelocity() == glm::vec2(0))
+	CueBall* cueBall = dynamic_cast<CueBall*>(m_physicsScene->GetActor(0));
+	if (cueBall != nullptr)
 	{
-		glm::vec2 force = glm::vec2(0);
 
-		if (input->isKeyDown(aie::INPUT_KEY_A))
+		if (cueBall->GetVelocity() == glm::vec2(0))
 		{
-			force.x += -400;
-		}
-		if (input->isKeyDown(aie::INPUT_KEY_D))
-		{
-			force.x += 400;
-		}
+			cueBall->CueDirFromMousePos(glm::vec2(input->getMouseX(), input->getMouseY()));
 
+			if (input->isKeyDown(aie::INPUT_KEY_A))
+			{
+				cueBall->AddToCueOffset(.2f);
+			}
+			if (input->isKeyDown(aie::INPUT_KEY_D))
+			{
+				cueBall->AddToCueOffset(-.2f);
+			}
 
-		if (input->isKeyDown(aie::INPUT_KEY_W))
-		{
-			force.y += 400;
-		}
-		
-		if (input->isKeyDown(aie::INPUT_KEY_S))
-		{
-			force.y += -400;
-		}
-		
+			if (input->wasKeyPressed(aie::INPUT_KEY_S))
+			{
+				cueBall->HoldingCue();
+			}
 
-		cue->ApplyForce(force, glm::vec2(0));
+			if (cueBall->GetHoldingCue() && input->isKeyUp(aie::INPUT_KEY_S))
+			{
+				cueBall->ReleaseCue();
+			}
+		}
 	}
 #endif // SetDreassingAPoolTable
 

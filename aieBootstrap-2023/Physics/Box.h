@@ -8,6 +8,8 @@ public:
 		glm::vec2 m_extents, glm::vec4 color);
 	Box(glm::vec2 position, glm::vec2 velocity, float mass, 
 		glm::vec2 m_extents, float elasticity, glm::vec4 color);
+	Box(glm::vec2 position, glm::vec2 velocity, float orientation, float mass,
+		glm::vec2 m_extents, float elasticity, glm::vec4 color);
 	~Box();
 
 	virtual void Draw(float alpha);

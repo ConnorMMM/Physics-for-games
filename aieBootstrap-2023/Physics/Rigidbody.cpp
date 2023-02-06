@@ -55,7 +55,7 @@ void Rigidbody::ApplyForce(glm::vec2 force, glm::vec2 pos)
 }
 
 void Rigidbody::ResolveCollision(Rigidbody* actor2, glm::vec2 contact,
-	glm::vec2* collisionNormal)
+	glm::vec2* collisionNormal, float pen)
 {
 	// find the vector between their centres, or use the provided direction
 	// of force, and make sure it's normalised
@@ -90,6 +90,9 @@ void Rigidbody::ResolveCollision(Rigidbody* actor2, glm::vec2 contact,
 		//apply equal and opposite forces
 		ApplyForce(-force, contact - m_position);
 		actor2->ApplyForce(force, contact - actor2->m_position);
+
+		if (pen > 0)
+			PhysicsScene::ApplyContactForces(this, actor2, normal, pen);
 	}
 }
 

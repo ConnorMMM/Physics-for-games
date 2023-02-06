@@ -3,6 +3,7 @@
 #include <vector>
 
 class PhysicsObject;
+class Rigidbody;
 
 class PhysicsScene
 {
@@ -17,6 +18,7 @@ public:
 	void debugScene();
 
 	void CheckForCollision();
+	static void ApplyContactForces(Rigidbody* body1, Rigidbody* body2, glm::vec2 norm, float pen);
 
 	static bool Plane2Plane(PhysicsObject*, PhysicsObject*);
 	static bool Plane2Circle(PhysicsObject*, PhysicsObject*);

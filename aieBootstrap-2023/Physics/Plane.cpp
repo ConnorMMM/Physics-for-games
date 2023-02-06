@@ -1,4 +1,5 @@
 #include "Plane.h"
+#include "PhysicsScene.h"
 
 #include <Gizmos.h>
 #include <iostream>
@@ -72,6 +73,9 @@ void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact)
 	float kePre = actor2->GetKineticEnergy();
 
 	actor2->ApplyForce(force, contact - actor2->GetPosition());
+
+	float pen = glm::dot(contact, m_normal) - m_distanceToOrigin;
+	PhysicsScene::ApplyContactForces(actor2, nullptr, m_normal, pen);
 
 	float kePost = actor2->GetKineticEnergy();
 

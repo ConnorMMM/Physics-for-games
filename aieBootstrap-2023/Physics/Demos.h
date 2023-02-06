@@ -5,7 +5,7 @@
 #define LINEAR_DRAG 0.3f
 #define ANGULAR_DRAG 0.3f
 
-#define MIN_LINEAR_THRESHOLD 0.05f
+#define MIN_LINEAR_THRESHOLD 0.01f
 #define MIN_ANGULAR_THRESHOLD 0.01f
 
 //#define NewtonsFirstLaw
@@ -23,5 +23,5 @@
 
 //#define FallingOnAPlane
 
-//#define BounceToAStop
-#define SetDreassingAPoolTable
+#define BounceToAStop
+//#define SetDreassingAPoolTable

@@ -13,7 +13,7 @@ public:
 	virtual void FixedUpdate(glm::vec2 gravity, float timeStep);
 	void ApplyForce(glm::vec2 force, glm::vec2 pos);
 	
-	void ResolveCollision(Rigidbody* actor2, glm::vec2 contact, glm::vec2* collisionNormal = nullptr);
+	void ResolveCollision(Rigidbody* actor2, glm::vec2 contact, glm::vec2* collisionNormal = nullptr, float pen = 0);
 	
 	void Rigidbody::CalculateSmoothedPosition(float alpha);
 
