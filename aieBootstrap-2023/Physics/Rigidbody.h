@@ -24,25 +24,27 @@ public:
 	virtual float GetEnergy() { return GetKineticEnergy() + GetPotentialEnergy(); }
 
 	// Getters
-	glm::vec2 GetPosition() const { return m_position; }
-	glm::vec2 GetLastPosition() { return m_lastPosition; }
-	glm::vec2 GetVelocity() { return m_velocity; }
-	float GetMass() { return m_mass; }
+	glm::vec2 GetPosition()	  const { return m_position; }
+	glm::vec2 GetLastPosition()		{ return m_lastPosition; }
+	glm::vec2 GetVelocity()			{ return m_velocity; }
+	float	  GetMass()				{ return m_isKinematic ? INT_MAX : m_mass; }
 
-	float GetOrientation() { return m_orientation; }
-	float GetLastOrientation() { return m_lastOrientation; }
-	float GetAngularVelocity() { return m_angularVelocity; }
-	float GetMoment() { return m_moment; }
+	float	  GetOrientation()		{ return m_orientation; }
+	float	  GetLastOrientation()	{ return m_lastOrientation; }
+	float	  GetAngularVelocity()	{ return m_angularVelocity; }
+	float	  GetMoment()			{ return m_isKinematic ? INT_MAX : m_moment; }
 
 	glm::vec2 GetSmoothedPosition() { return m_smoothedPosition; }
-	glm::vec2 GetSmoothedLocalX() { return m_smoothedLocalX; }
-	glm::vec2 GetSmoothedLocalY() { return m_smoothedLocalY; }
+	glm::vec2 GetSmoothedLocalX()	{ return m_smoothedLocalX; }
+	glm::vec2 GetSmoothedLocalY()	{ return m_smoothedLocalY; }
 
-	glm::vec2 GetLocalX() { return m_localX; }
-	glm::vec2 GetLocalY() { return m_localY; }
+	glm::vec2 GetLocalX()			{ return m_localX; }
+	glm::vec2 GetLocalY()			{ return m_localY; }
 
-	float GetLinearDrag() { return m_linearDrag; }
-	float GetAngularDrag() { return m_angularDrag; }
+	float	  GetLinearDrag()		{ return m_linearDrag; }
+	float	  GetAngularDrag()		{ return m_angularDrag; }
+
+	bool	  IsKinematic()			{ return m_isKinematic; }
 
 	// Setters
 	void SetPosition(glm::vec2 position) { m_position = position; }
@@ -55,6 +57,8 @@ public:
 
 	void SetLinearDrag(float linearDrag) { m_linearDrag = linearDrag; }
 	void SetAngularDrag(float angularDrag) { m_angularDrag = angularDrag; }
+
+	void SetKinematic(bool state) { m_isKinematic = state; }
 
 protected:
 	glm::vec2 m_position;
@@ -79,4 +83,5 @@ protected:
 	float m_linearDrag;
 	float m_angularDrag;
 
+	bool m_isKinematic;
 };

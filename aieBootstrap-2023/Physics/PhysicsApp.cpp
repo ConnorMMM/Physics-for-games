@@ -299,7 +299,38 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(billiardBall10);
 
 #endif // SetDreassingAPoolTable
+#ifdef BouncePads
+	m_physicsScene->SetGravity(glm::vec2(0, -9.81));
 
+	Circle* ball1 = new Circle(glm::vec2(0, 0), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(0, 1, 0, 1));
+	Box* box1 = new Box(glm::vec2(0 , -40), glm::vec2(0), 0, 5.f, glm::vec2(4, 4), 1.f, glm::vec4(1, 0, 0, 1));
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(box1);
+
+	box1->SetKinematic(true);
+
+#endif // BouncePads
+#ifdef PhysicsBuckets
+	m_physicsScene->SetGravity(glm::vec2(0, -9.81));
+
+	Circle* ball1 = new Circle(glm::vec2(0, 0), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(0, 1, 0, 1));
+	Box* box1 = new Box(glm::vec2(0, 20), glm::vec2(0), 0, 5.f, glm::vec2(4, 4), 1.f, glm::vec4(0, 0, 1, 1));
+	Box* box2 = new Box(glm::vec2(0, -20), glm::vec2(0), 0, 5.f, glm::vec2(4, 4), 1.f, glm::vec4(0, 0, 1, 1));
+	
+	Box* box3 = new Box(glm::vec2(20, -40), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(15, 15), 1.f, glm::vec4(1, 0, 0, 1));
+	Box* box4 = new Box(glm::vec2(-20, -40), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(15, 15), 1.f, glm::vec4(1, 0, 0, 1));
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(box1);
+	m_physicsScene->AddActor(box2);
+	m_physicsScene->AddActor(box3);
+	m_physicsScene->AddActor(box4);
+
+	box3->SetKinematic(true);
+	box4->SetKinematic(true);
+
+#endif // PhysicsBuckets
 
 }
 

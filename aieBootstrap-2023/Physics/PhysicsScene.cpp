@@ -255,7 +255,8 @@ bool PhysicsScene::Box2Circle(PhysicsObject* obj1, PhysicsObject* obj2)
 		// and convert back into world coordinates
 		glm::vec2 closestPointOnBoxWorld = box->GetPosition() + closestPointOnBoxBox.x * box->GetLocalX() + closestPointOnBoxBox.y * box->GetLocalY();
 		glm::vec2 circleToBox = circle->GetPosition() - closestPointOnBoxWorld;
-		float pen = circle->GetRadius() - glm::length(circleToBox);
+		float temp = glm::length(circleToBox);
+		float pen = circle->GetRadius() - temp;
 		if (pen > 0)
 		{
 			glm::vec2 direction = glm::normalize(circleToBox);
