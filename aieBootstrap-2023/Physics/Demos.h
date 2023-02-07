@@ -30,4 +30,6 @@
 //#define PhysicsBuckets
 
 //#define Tutorial09
-#define RopTest
+//#define RopTest
+
+#define SoftBodyTest

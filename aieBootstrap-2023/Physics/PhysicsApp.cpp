@@ -11,6 +11,7 @@
 #include "Box.h"
 #include "Plane.h"
 #include "Spring.h"
+#include "SoftBody.h"
 
 #include <glm/ext.hpp>
 
@@ -374,6 +375,52 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(box);
 
 #endif // RopTest
+#ifdef SoftBodyTest
+	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+
+	std::vector<std::string> c;
+	c.push_back("000000");
+	c.push_back("000000");
+	c.push_back("000000");
+	c.push_back("000...");
+	c.push_back("000...");
+	c.push_back("000...");
+	c.push_back("000000");
+	c.push_back("000000");
+	c.push_back("000000");
+	SoftBody::Build(m_physicsScene, glm::vec2(-100, 0), 5.0f, 10.0f, 6, c);
+
+	std::vector<std::string> o;
+	o.push_back("000000");
+	o.push_back("000000");
+	o.push_back("000000");
+	o.push_back("00..00");
+	o.push_back("00..00");
+	o.push_back("00..00");
+	o.push_back("000000");
+	o.push_back("000000");
+	o.push_back("000000");
+	SoftBody::Build(m_physicsScene, glm::vec2(-60, 0), 1.0f, 40.0f, 6, o);
+
+	std::vector<std::string> n;
+	n.push_back("00..00");
+	n.push_back("00.000");
+	n.push_back("00.000");
+	n.push_back("000000");
+	n.push_back("000000");
+	n.push_back("000000");
+	n.push_back("000.00");
+	n.push_back("000.00");
+	n.push_back("00..00");
+	SoftBody::Build(m_physicsScene, glm::vec2(-20, 0), 5.0f, 10.0f, 6, n);
+	SoftBody::Build(m_physicsScene, glm::vec2(30, 0), 5.0f, 10.0f, 6, n);
+	SoftBody::Build(m_physicsScene, glm::vec2(70, 0), 5.0f, 10.0f, 6, o);
+
+	Plane* plane1 = new Plane(glm::vec2(0, 1), -40, 0.6f, glm::vec4(1, 0, 0, 1));
+	m_physicsScene->AddActor(plane1);
+	
+
+#endif // SoftBodyTest
 
 }
 
