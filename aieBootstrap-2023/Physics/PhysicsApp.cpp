@@ -10,6 +10,7 @@
 #include "CueBall.h"
 #include "Box.h"
 #include "Plane.h"
+#include "Spring.h"
 
 #include <glm/ext.hpp>
 
@@ -321,16 +322,58 @@ void PhysicsApp::DemoStartUp(int num)
 	Box* box3 = new Box(glm::vec2(20, -40), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(15, 15), 1.f, glm::vec4(1, 0, 0, 1));
 	Box* box4 = new Box(glm::vec2(-20, -40), glm::vec2(0), DegreeToRadian(45), 5.f, glm::vec2(15, 15), 1.f, glm::vec4(1, 0, 0, 1));
 
+	Circle* ball2 = new Circle(glm::vec2(-30, 0), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(0, 1, 0, 1));
+	Circle* ball3 = new Circle(glm::vec2(-30, -20), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(1, 0, 0, 1));
+
 	m_physicsScene->AddActor(ball1);
 	m_physicsScene->AddActor(box1);
 	m_physicsScene->AddActor(box2);
 	m_physicsScene->AddActor(box3);
 	m_physicsScene->AddActor(box4);
+	m_physicsScene->AddActor(ball2);
+	m_physicsScene->AddActor(ball3);
 
 	box3->SetKinematic(true);
 	box4->SetKinematic(true);
+	ball3->SetKinematic(true);
 
 #endif // PhysicsBuckets
+#ifdef Tutorial09
+	m_physicsScene->SetGravity(glm::vec2(0, -9.81));
+
+	Circle* ball1 = new Circle(glm::vec2(0, 0), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(0, 1, 0, 1));
+	Circle* ball2 = new Circle(glm::vec2(-10, 0), glm::vec2(0), 3.0f, 4, 1.f, glm::vec4(1, 0, 0, 1));
+	Spring* spring = new Spring(ball1, ball2, 10, 10, 30);
+
+	m_physicsScene->AddActor(ball1);
+	m_physicsScene->AddActor(ball2);
+	m_physicsScene->AddActor(spring);
+
+	ball2->SetKinematic(true);
+
+#endif // Tutorial09
+#ifdef RopTest
+	m_physicsScene->SetGravity(glm::vec2(0, -9.82f));
+
+	Circle* prev = nullptr;
+	for (int i = 0; i < 10; i++)
+	{
+		// spawn a circle to the right and below the previous one, so that the whole rope acts under gravity and swings
+		Circle* circle = new Circle(glm::vec2(i * 3, 30 - i * 5), glm::vec2(0), 10, 2, glm::vec4(1, 0, 0, 1));
+		if (i == 0 || i == 9)
+			circle->SetKinematic(true);
+		m_physicsScene->AddActor(circle);
+		if (prev)
+			m_physicsScene->AddActor(new Spring(circle, prev, 500, 10, 7));
+		prev = circle;
+	}
+
+	// add a kinematic box at an angle for the rope to drape over
+	Box* box = new Box(glm::vec2(15, -20), glm::vec2(0), 20, 20, glm::vec2(2, 8), 1, glm::vec4(0, 0, 1, 1));
+	box->SetKinematic(true);
+	m_physicsScene->AddActor(box);
+
+#endif // RopTest
 
 }
 

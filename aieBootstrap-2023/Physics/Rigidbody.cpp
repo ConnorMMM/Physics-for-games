@@ -127,6 +127,16 @@ void Rigidbody::CalculateAxes()
 	m_localY = glm::vec2(-sn, cs);
 }
 
+glm::vec2 Rigidbody::ToWorld(glm::vec2 contact, float alpha)
+{
+	return m_position + m_localX * contact.x + m_localY * contact.y;
+}
+
+glm::vec2 Rigidbody::ToWorldSmoothed(glm::vec2 localPos)
+{
+	return m_smoothedPosition + m_smoothedLocalX * localPos.x + m_smoothedLocalY * localPos.y;
+}
+
 float Rigidbody::GetKineticEnergy()
 {
 	return .5f * (m_mass * glm::dot(m_velocity, m_velocity) + m_moment * m_angularVelocity * m_angularVelocity);

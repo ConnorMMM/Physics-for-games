@@ -15,9 +15,12 @@ public:
 	
 	void ResolveCollision(Rigidbody* actor2, glm::vec2 contact, glm::vec2* collisionNormal = nullptr, float pen = 0);
 	
-	void Rigidbody::CalculateSmoothedPosition(float alpha);
+	void CalculateSmoothedPosition(float alpha);
 
 	void CalculateAxes();
+
+	glm::vec2 ToWorld(glm::vec2 contact, float alpha);
+	glm::vec2 ToWorldSmoothed(glm::vec2 localPos);
 
 	virtual float GetKineticEnergy();
 	float GetPotentialEnergy();
@@ -27,7 +30,7 @@ public:
 	glm::vec2 GetPosition()	  const { return m_position; }
 	glm::vec2 GetLastPosition()		{ return m_lastPosition; }
 	glm::vec2 GetVelocity()			{ return m_velocity; }
-	float	  GetMass()				{ return m_isKinematic ? INT_MAX : m_mass; }
+	float GetMass()				{ return m_isKinematic ? INT_MAX : m_mass; }
 
 	float	  GetOrientation()		{ return m_orientation; }
 	float	  GetLastOrientation()	{ return m_lastOrientation; }

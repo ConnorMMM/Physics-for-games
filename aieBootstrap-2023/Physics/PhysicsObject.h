@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 
 enum ShapeType {
+	JOINT = -1,
 	PLANE = 0,
 	CIRCLE,
 	BOX,
@@ -32,7 +33,6 @@ public:
 
 protected:
 	ShapeType m_shapeID;
-
 	float m_elasticity;
 	glm::vec4 m_color;
 
