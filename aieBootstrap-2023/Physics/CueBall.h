@@ -1,5 +1,7 @@
 #pragma once
+
 #include "Circle.h"
+#include "Input.h"
 
 class CueBall : public Circle
 {
@@ -24,11 +26,15 @@ public:
 	void SetCueDir(glm::vec2 cueDir) { m_cueDir = cueDir; }
 	void SetCueOffset(float cueOffset) { m_cueOffset = cueOffset; }
 
+	glm::vec2 ScreenToWorld(glm::vec2 screenPos);
+
 protected:
 	glm::vec2 m_cueDir;
 	float m_cueOffset;
 
 	bool m_holdingCue;
 	float m_cueDistance;
+
+	aie::Input* m_input;
 };
 

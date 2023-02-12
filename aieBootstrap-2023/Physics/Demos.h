@@ -24,7 +24,7 @@
 //#define FallingOnAPlane
 
 //#define BounceToAStop
-//#define SetDreassingAPoolTable
+#define SetDreassingAPoolTable
 
 //#define BouncePads
 //#define PhysicsBuckets
@@ -32,4 +32,4 @@
 //#define Tutorial09
 //#define RopTest
 
-#define SoftBodyTest
+//#define SoftBodyTest

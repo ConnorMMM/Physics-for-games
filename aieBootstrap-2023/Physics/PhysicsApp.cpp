@@ -75,9 +75,8 @@ void PhysicsApp::draw() {
 	m_2dRenderer->begin();
 
 	// draw your stuff here!
-	static float aspectRatio = 16.f / 9.f;
-	aie::Gizmos::draw2D(glm::ortho<float>(-100, 100,
-		-100 / aspectRatio, 100 / aspectRatio, -1.f, 1.f));
+	aie::Gizmos::draw2D(glm::ortho<float>(-m_extents, m_extents,
+		-m_extents / m_aspectRatio, m_extents / m_aspectRatio, -1.f, 1.f));
 	
 	// output some text, uses the last used colour
 	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 0);
@@ -462,34 +461,8 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 	//
 	//}
 
-	CueBall* cueBall = dynamic_cast<CueBall*>(m_physicsScene->GetActor(0));
-	if (cueBall != nullptr)
-	{
+	glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
 
-		if (cueBall->GetVelocity() == glm::vec2(0))
-		{
-			cueBall->CueDirFromMousePos(glm::vec2(input->getMouseX(), input->getMouseY()));
-
-			if (input->isKeyDown(aie::INPUT_KEY_A))
-			{
-				cueBall->AddToCueOffset(.2f);
-			}
-			if (input->isKeyDown(aie::INPUT_KEY_D))
-			{
-				cueBall->AddToCueOffset(-.2f);
-			}
-
-			if (input->wasKeyPressed(aie::INPUT_KEY_S))
-			{
-				cueBall->HoldingCue();
-			}
-
-			if (cueBall->GetHoldingCue() && input->isKeyUp(aie::INPUT_KEY_S))
-			{
-				cueBall->ReleaseCue();
-			}
-		}
-	}
 #endif // SetDreassingAPoolTable
 
 }
@@ -497,4 +470,19 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 float PhysicsApp::DegreeToRadian(float degree)
 {
 	return degree * (PI / 180.f);
+}
+
+glm::vec2 PhysicsApp::ScreenToWorld(glm::vec2 screenPos)
+{
+	glm::vec2 worldPos = screenPos;
+
+	// move the centre of the screen to (0,0)
+	worldPos.x -= getWindowWidth() / 2;
+	worldPos.y -= getWindowHeight() / 2;
+
+	// scale according to our extents
+	worldPos.x *= 2.0f * m_extents / getWindowWidth();
+	worldPos.y *= 2.0f * m_extents / (m_aspectRatio * getWindowHeight());
+
+	return worldPos;
 }

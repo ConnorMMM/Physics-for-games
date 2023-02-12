@@ -22,6 +22,12 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+	void DemoStartUp(int num);
+	void DemoUpdates(aie::Input* input, float dt);
+
+	float DegreeToRadian(float degree);
+	glm::vec2 ScreenToWorld(glm::vec2 screenPos);
+
 protected:
 
 	aie::Renderer2D*	m_2dRenderer;
@@ -34,8 +40,7 @@ protected:
 	int m_timeSteps;
 	float rocketDir;
 
-public:
-	void DemoStartUp(int num);
-	void DemoUpdates(aie::Input* input, float dt);
-	float DegreeToRadian(float degree);
+	const float m_extents = 100;
+	const float m_aspectRatio = 16.0f / 9.0f;
+
 };

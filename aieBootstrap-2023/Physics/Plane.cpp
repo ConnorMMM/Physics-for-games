@@ -70,16 +70,19 @@ void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact)
 
 	glm::vec2 force = m_normal * j;
 
-	float kePre = actor2->GetKineticEnergy();
+	//float kePre = actor2->GetKineticEnergy();
 
 	actor2->ApplyForce(force, contact - actor2->GetPosition());
+
+	if (actor2->collisionCallback)
+		actor2->collisionCallback(this);
 
 	float pen = glm::dot(contact, m_normal) - m_distanceToOrigin;
 	PhysicsScene::ApplyContactForces(actor2, nullptr, m_normal, pen);
 
-	float kePost = actor2->GetKineticEnergy();
+	//float kePost = actor2->GetKineticEnergy();
 
-	float deltaKE = kePost - kePre;
-	if (deltaKE > kePost * 0.01f)
-		std::cout << "Kinetic Energy discrepancy greater than 1% detected!!";
+	//float deltaKE = kePost - kePre;
+	//if (deltaKE > kePost * 0.01f)
+	//	std::cout << "Kinetic Energy discrepancy greater than 1% detected!!";
 }
