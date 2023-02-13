@@ -14,6 +14,9 @@
 #include "SoftBody.h"
 
 #include <glm/ext.hpp>
+#include <iostream>
+#include <string>
+#include <vector>
 
 PhysicsApp::PhysicsApp() {
 
@@ -39,6 +42,8 @@ bool PhysicsApp::startup() {
 	m_timeSteps = 0;
 
 	DemoStartUp(1);
+
+	m_score = 0;
 
 	return true;
 }
@@ -80,6 +85,7 @@ void PhysicsApp::draw() {
 	
 	// output some text, uses the last used colour
 	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 0);
+	m_2dRenderer->drawText(m_font, std::to_string(m_score).c_str(), 0, 30);
 
 	// done drawing sprites
 	m_2dRenderer->end();
@@ -261,32 +267,78 @@ void PhysicsApp::DemoStartUp(int num)
 #endif // BounceToAStop
 #ifdef SetDreassingAPoolTable
 	m_physicsScene->SetGravity(glm::vec2(0));
-
-	//Walls
-	Plane* plane1 = new Plane(glm::vec2( 0,  1), -40, 0.6f, glm::vec4(1, 0, 0, 1));
-	Plane* plane2 = new Plane(glm::vec2( 0, -1), -40, 0.6f, glm::vec4(1, 0, 0, 1));
-	Plane* plane3 = new Plane(glm::vec2( 1,  0), -80, 0.6f, glm::vec4(1, 0, 0, 1));
-	Plane* plane4 = new Plane(glm::vec2(-1,  0), -80, 0.6f, glm::vec4(1, 0, 0, 1));
 	
-	CueBall* cueBall  = new CueBall(glm::vec2(40, 0),  glm::vec2(0), 3.0f, 3.4f, 0.8f);
+	// Walls
+	Box* leftWall = new Box(glm::vec2(-84, 0), glm::vec2(0), 0, 5.f,
+		glm::vec2(4, 35.25f), 0.8f, glm::vec4(1, 1, 1, 1));
+	Box* rightWall = new Box(glm::vec2(84, 0), glm::vec2(0), 0, 5.f,
+		glm::vec2(4, 35.25f), 0.3f, glm::vec4(1, 1, 1, 1));
 
-	Circle* billiardBall1  = new Circle(glm::vec2(-30,  0   ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall2  = new Circle(glm::vec2(-37,  4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall3  = new Circle(glm::vec2(-37, -4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall4  = new Circle(glm::vec2(-44,  8.5f),  glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall5  = new Circle(glm::vec2(-44,  0   ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall6  = new Circle(glm::vec2(-44, -8.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall7  = new Circle(glm::vec2(-51,  13  ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall8  = new Circle(glm::vec2(-51,  4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall9  = new Circle(glm::vec2(-51, -4.5f), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
-	Circle* billiardBall10 = new Circle(glm::vec2(-51, -13  ), glm::vec2(0), 5.0f, 4, 0.8f, glm::vec4(0, 1, 0, 1));
+	Box* topWall1 = new Box(glm::vec2(40, -44), glm::vec2(0), 0, 5.f,
+		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1));
+	Box* topWall2 = new Box(glm::vec2(-40, -44), glm::vec2(0), 0, 5.f,
+		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1));
+
+	Box* bottomWall1 = new Box(glm::vec2(40, 44), glm::vec2(0), 0, 5.f,
+		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1));
+	Box* bottomWall2 = new Box(glm::vec2(-40, 44), glm::vec2(0), 0, 5.f,
+		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1));
+
+	// Pockets
+	std::vector<Circle*> m_pockets;
+	Circle* pocket1 = new Circle(glm::vec2(-81.5f, 41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket1);
+	Circle* pocket2 = new Circle(glm::vec2(0, 45.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket2);
+	Circle* pocket3 = new Circle(glm::vec2(81.5f, 41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket3);
+	Circle* pocket4 = new Circle(glm::vec2(-81.5, -41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket4);
+	Circle* pocket5 = new Circle(glm::vec2(0, -45.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket5);
+	Circle* pocket6 = new Circle(glm::vec2(81.5f, -41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1));
+	m_pockets.push_back(pocket6);
+
+	for each (Circle* pocket in m_pockets)
+	{
+		m_physicsScene->AddActor(pocket);
+		pocket->SetTrigger(true);
+		pocket->triggerEnter = [=](PhysicsObject* other) {
+			Circle* ball = dynamic_cast<Circle*>(other);
+			ball->SetPosition(glm::vec2(-90 + (m_score * 5), 53));
+			ball->SetKinematic(true);
+			m_score++;
+		};
+	}
+
+	
+	CueBall* cueBall  = new CueBall(glm::vec2(40, 0),  glm::vec2(0), 3.0f, 1.7f, 0.8f);
+
+
+	Circle* billiardBall1  = new Circle(glm::vec2(-30,     0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall2  = new Circle(glm::vec2(-33.5f,  2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall3  = new Circle(glm::vec2(-33.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall4  = new Circle(glm::vec2(-37,     4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall5  = new Circle(glm::vec2(-37,     0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall6  = new Circle(glm::vec2(-37,    -4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall7  = new Circle(glm::vec2(-40.5f,  6), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall8  = new Circle(glm::vec2(-40.5f,  2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall9  = new Circle(glm::vec2(-40.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall10 = new Circle(glm::vec2(-40.5f, -6), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall11 = new Circle(glm::vec2(-44,     8), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall12 = new Circle(glm::vec2(-44,     4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall13 = new Circle(glm::vec2(-44,     0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall14 = new Circle(glm::vec2(-44,    -4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
+	Circle* billiardBall15 = new Circle(glm::vec2(-44,    -8), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 1, 0, 1));
 
 	m_physicsScene->AddActor(cueBall);
 
-	m_physicsScene->AddActor(plane1);
-	m_physicsScene->AddActor(plane2);
-	m_physicsScene->AddActor(plane3);
-	m_physicsScene->AddActor(plane4);
+	m_physicsScene->AddActor(leftWall);
+	m_physicsScene->AddActor(rightWall);
+	m_physicsScene->AddActor(topWall1);
+	m_physicsScene->AddActor(topWall2);
+	m_physicsScene->AddActor(bottomWall1);
+	m_physicsScene->AddActor(bottomWall2);
 
 	m_physicsScene->AddActor(billiardBall1);
 	m_physicsScene->AddActor(billiardBall2);
@@ -298,6 +350,20 @@ void PhysicsApp::DemoStartUp(int num)
 	m_physicsScene->AddActor(billiardBall8);
 	m_physicsScene->AddActor(billiardBall9);
 	m_physicsScene->AddActor(billiardBall10);
+	m_physicsScene->AddActor(billiardBall11);
+	m_physicsScene->AddActor(billiardBall12);
+	m_physicsScene->AddActor(billiardBall13);
+	m_physicsScene->AddActor(billiardBall14);
+	m_physicsScene->AddActor(billiardBall15);
+
+	leftWall->SetKinematic(true);
+	rightWall->SetKinematic(true);
+	topWall1->SetKinematic(true);
+	topWall2->SetKinematic(true);
+	bottomWall1->SetKinematic(true);
+	bottomWall2->SetKinematic(true);
+
+
 
 #endif // SetDreassingAPoolTable
 #ifdef BouncePads
@@ -456,12 +522,34 @@ void PhysicsApp::DemoUpdates(aie::Input* input, float dt)
 #endif // SimulatingRocket
 
 #ifdef SetDreassingAPoolTable
-	//for (int i = 0; i < m_physicsScene->)
-	//{
-	//
-	//}
+	
+	if (CueBall* cueBall = m_physicsScene->GetCueBall())
+	{
+		if (cueBall->GetVelocity() == glm::vec2(0))
+		{
+			glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
+			cueBall->CueDirFromMousePos(mousePos);
 
-	glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
+			if (input->isKeyDown(aie::INPUT_KEY_A))
+			{
+				cueBall->AddToCueOffset(.2f);
+			}
+			if (input->isKeyDown(aie::INPUT_KEY_D))
+			{
+				cueBall->AddToCueOffset(-.2f);
+			}
+
+			if (input->wasKeyPressed(aie::INPUT_KEY_S))
+			{
+				cueBall->HoldingCue();
+			}
+
+			if (cueBall->GetHoldingCue() && input->isKeyUp(aie::INPUT_KEY_S))
+			{
+				cueBall->ReleaseCue();
+			}
+		}
+	}
 
 #endif // SetDreassingAPoolTable
 

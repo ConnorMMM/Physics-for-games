@@ -4,18 +4,16 @@
 #include "Box.h"
 #include "Plane.h"
 #include "CueBall.h"
-#include "Demos.h"
 
 #include <glm/glm.hpp>
-#include <iostream>
 
-	glm::vec2 PhysicsScene::m_gravity(0, 0);
+glm::vec2 PhysicsScene::m_gravity(0, 0);
 
-	PhysicsScene::PhysicsScene()
-	{
-		m_timeStep = 0.01f;
-		m_gravity = glm::vec2(0);
-	}
+PhysicsScene::PhysicsScene()
+{
+	m_timeStep = 0.01f;
+	m_gravity = glm::vec2(0);
+}
 
 	PhysicsScene::~PhysicsScene()
 	{
@@ -73,9 +71,7 @@
 
 			accumulatedTime -= m_timeStep;
 
-#ifndef SimulatingRocket
 			CheckForCollision();
-#endif // !SimulatingRocket
 		}
 	}
 
@@ -90,12 +86,10 @@
 	void PhysicsScene::CheckForCollision()
 	{
 		int actorCount = m_actors.size();
-		std::list<PhysicsObject*> m_triggers;
 
 		// need to check for collisions against all objects except this one.
 		for (int outer = 0; outer < actorCount - 1; outer++)
 		{
-			
 			for (int inner = outer + 1; inner < actorCount; inner++)
 			{
 				PhysicsObject* object1 = m_actors[outer];
@@ -116,8 +110,6 @@
 				}
 			}
 		}
-
-
 	}
 
 	void PhysicsScene::ApplyContactForces(Rigidbody* body1, Rigidbody* body2, glm::vec2 norm, float pen)
@@ -324,29 +316,4 @@
 		}
 
 		return nullptr;
-	}
-
-	void PhysicsScene::SetActorsLinearDrag(float linearDrag)
-	{
-		for each (PhysicsObject * actor in m_actors)
-		{
-			if (actor->GetShapeID() != 0)
-			{
-				Rigidbody* rigidbody = dynamic_cast<Rigidbody*>(actor);
-				rigidbody->SetLinearDrag(linearDrag);
-			}
-		}
-
-	}
-
-	void PhysicsScene::SetActorsAngularDrag(float angularDrag)
-	{
-		for each (PhysicsObject * actor in m_actors)
-		{
-			if (actor->GetShapeID() != 0)
-			{
-				Rigidbody* rigidbody = dynamic_cast<Rigidbody*>(actor);
-				rigidbody->SetAngularDrag(angularDrag);
-			}
-		}
 	}

@@ -1,6 +1,13 @@
 #pragma once
+
 #include <glm/vec2.hpp>
 #include <vector>
+
+#define LINEAR_DRAG 0.3f
+#define ANGULAR_DRAG 0.3f
+
+#define MIN_LINEAR_THRESHOLD 0.2f
+#define MIN_ANGULAR_THRESHOLD 0.01f
 
 class PhysicsObject;
 class Rigidbody;
@@ -57,11 +64,10 @@ class CueBall;
 		{
 			m_timeStep = timeStep;
 		}
-		void SetActorsLinearDrag(float linearDrag);
-		void SetActorsAngularDrag(float angularDrag);
 
 	protected:
 		static glm::vec2 m_gravity;
 		float m_timeStep;
 		std::vector<PhysicsObject*> m_actors;
+
 	};

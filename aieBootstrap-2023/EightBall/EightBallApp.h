@@ -2,19 +2,20 @@
 
 #include "Application.h"
 #include "Renderer2D.h"
-#include "Input.h"
 
-#include <vector>
 #include <glm/vec2.hpp>
+#include <vector>
+
+#define PI 3.14159265359
 
 class PhysicsScene;
 class PhysicsObject;
 
-class PhysicsApp : public aie::Application {
+class EightBallApp : public aie::Application {
 public:
 
-	PhysicsApp();
-	virtual ~PhysicsApp();
+	EightBallApp();
+	virtual ~EightBallApp();
 
 	virtual bool startup();
 	virtual void shutdown();
@@ -22,8 +23,7 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
-	void DemoStartUp(int num);
-	void DemoUpdates(aie::Input* input, float dt);
+	void BoardStartUp();
 
 	float DegreeToRadian(float degree);
 	glm::vec2 ScreenToWorld(glm::vec2 screenPos);
@@ -37,11 +37,10 @@ protected:
 
 	std::vector<PhysicsObject*> m_physicsObjects;
 
-	int m_timeSteps;
-	float rocketDir;
-
 	const float m_extents = 100;
 	const float m_aspectRatio = 16.0f / 9.0f;
+
+	std::vector<PhysicsObject*> m_ballsInPockets;
 
 	int m_score;
 };
