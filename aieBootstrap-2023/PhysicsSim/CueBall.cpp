@@ -7,10 +7,9 @@
         Circle(position, velocity, mass, radius, elasticity, glm::vec4(1, 1, 1, 1))
     {
         m_cueDir = glm::vec2(0);
-        m_cueOffset = 0;
 
         m_holding = false;
-        m_cueDistance = 0;
+        m_drawCue = false;
     }
 
     CueBall::~CueBall()
@@ -23,14 +22,14 @@
 
         if (m_holding)
         {
-            m_cueDistance = (m_currentMouseDis - m_heldMouseDis) / 2.f;
+            m_cuePower = (m_currentMouseDis - m_heldMouseDis) / 2.f;
 
-            if (m_cueDistance >= 8) m_cueDistance = 8;
-            if (m_cueDistance < 0) m_cueDistance = 0;
+            if (m_cuePower >= 8) m_cuePower = 8;
+            if (m_cuePower < 0) m_cuePower = 0;
         }
         else
         {
-            m_cueDistance = 0;
+            m_cuePower = 0;
         }
     }
 
@@ -42,14 +41,14 @@
 
         aie::Gizmos::add2DLine(m_smoothedPosition, m_smoothedPosition + m_smoothedLocalX * m_radius, glm::vec4(0, 0, 0, 1));
 
-        if (GetVelocity() == glm::vec2(0))
+        if (m_drawCue)
         {
             if (m_holding)
             {
                 aie::Gizmos::add2DCircle(m_smoothedPosition + (m_cueDir * m_heldMouseDis), 1, 12, m_color);
             }
             aie::Gizmos::add2DCircle(m_smoothedPosition + (m_cueDir * m_currentMouseDis), 1, 12, m_color);
-            aie::Gizmos::add2DLine(m_smoothedPosition + (-m_cueDir * m_radius), m_smoothedPosition + (-m_cueDir * (m_cueDistance * 2.f + m_radius)), glm::vec4(1, 0, 0, 1));
+            aie::Gizmos::add2DLine(m_smoothedPosition + (-m_cueDir * m_radius), m_smoothedPosition + (-m_cueDir * (m_cuePower * 2.f + m_radius)), glm::vec4(1, 0, 0, 1));
             aie::Gizmos::add2DLine(m_smoothedPosition, m_smoothedPosition + (-m_cueDir * glm::vec2(50, 50)), m_color);
         }
     }
@@ -58,7 +57,7 @@
     {
         if (m_holding && !state)
         {
-            ApplyForce(-m_cueDir * m_cueDistance * 120.f, glm::vec2(0));
+            ApplyForce(-m_cueDir * m_cuePower * 120.f, glm::vec2(0));
         }
         else if (!m_holding && state)
         {
@@ -72,13 +71,4 @@
     {
         m_currentMouseDis = glm::distance(m_position, mousePos);
         m_cueDir = glm::normalize(mousePos - m_position);
-    }
-
-
-    void CueBall::AddToCueOffset(float offset)
-    {
-        m_cueOffset += offset;
-
-        if (m_cueOffset > 3) m_cueOffset = 3;
-        if (m_cueOffset < -3) m_cueOffset = -3;
     }

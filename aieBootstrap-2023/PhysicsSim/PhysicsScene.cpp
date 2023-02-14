@@ -4,6 +4,7 @@
 #include "Box.h"
 #include "Plane.h"
 #include "CueBall.h"
+#include "BilliardBall.h"
 
 #include <glm/glm.hpp>
 
@@ -316,4 +317,27 @@ PhysicsScene::PhysicsScene()
 		}
 
 		return nullptr;
+	}
+
+	std::vector<BilliardBall*> PhysicsScene::GetBilliardBalls()
+	{
+		std::vector<BilliardBall*> balls;
+		for (int i = 0; i < m_actors.size(); i++)
+		{
+			if (BilliardBall* ball = dynamic_cast<BilliardBall*>(GetActor(i)))
+				balls.push_back(ball);
+		}
+		return balls;
+	}
+
+	bool PhysicsScene::AllStationary()
+	{
+		for (int i = 0; i < m_actors.size(); i++)
+		{
+			Rigidbody* actor = dynamic_cast<Rigidbody*>(GetActor(i));
+			if (actor && actor->GetVelocity() != glm::vec2(0))
+				return false;
+		}
+
+		return true;
 	}

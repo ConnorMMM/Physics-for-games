@@ -12,6 +12,7 @@
 class PhysicsObject;
 class Rigidbody;
 class CueBall;
+class BilliardBall;
 
 	class PhysicsScene
 	{
@@ -40,6 +41,8 @@ class CueBall;
 
 		float GetTotalEnergy();
 		CueBall* GetCueBall();
+		std::vector<BilliardBall*> GetBilliardBalls();
+		bool AllStationary();
 
 		// Getters
 		static glm::vec2 GetGravity()

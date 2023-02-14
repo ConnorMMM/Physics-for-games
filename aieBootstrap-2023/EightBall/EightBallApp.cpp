@@ -7,6 +7,7 @@
 #include "PhysicsScene.h"
 #include "Circle.h"
 #include "CueBall.h"
+#include "BilliardBall.h"
 #include "Box.h"
 #include "Plane.h"
 #include "Spring.h"
@@ -31,6 +32,8 @@ bool EightBallApp::startup() {
 
 	m_2dRenderer = new aie::Renderer2D();
 
+	m_poolTable = new aie::Texture("./textures/pooltable.png");
+
 	// TODO: remember to change this when redistributing a build!
 	// the following path would be used instead: "./font/consolas.ttf"
 	m_font = new aie::Font("../bin/font/consolas.ttf", 32);
@@ -41,7 +44,20 @@ bool EightBallApp::startup() {
 
 	BoardStartUp();
 
-	m_score = 0;
+	m_player1Turn = true;
+
+	m_firstSunk = false;
+	m_whiteSunk = false;
+
+	m_solidSunk = 0;
+	m_stripeSunk = 0;
+
+	m_inPlay = false;
+	m_gameOver = false;
+
+	m_ballSunk = false;
+	m_foul = false;
+	m_shotsLeft = 1;
 
 	return true;
 }
@@ -57,56 +73,19 @@ void EightBallApp::update(float deltaTime) {
 	// input example
 	aie::Input* input = aie::Input::getInstance();
 
-	aie::Gizmos::clear();
-
 	m_physicsScene->Update(deltaTime);
-	m_physicsScene->Draw();
 
-	for each (PhysicsObject* ball in m_ballsInPockets)
+	CheckPockets();
+	UpdateGameState(input);
+
+	// FOR TESTING
+	if (input->isKeyDown(aie::INPUT_KEY_K))
 	{
-		if (Circle* poolBall = dynamic_cast<Circle*>(ball))
+		if (CueBall* cueBall = m_physicsScene->GetCueBall())
 		{
-			if (CueBall* cueBall = dynamic_cast<CueBall*>(poolBall))
-			{
-				cueBall->SetPosition(glm::vec2(40, 0));
-				cueBall->SetVelocity(glm::vec2(0));
-				cueBall->SetAngularVelocity(0);
-			}
-			else
-			{
-				poolBall->SetPosition(glm::vec2(-90 + (m_score * 5), 53));
-				poolBall->SetKinematic(true);
-			}
-		}
-	}
-	m_ballsInPockets.clear();
-
-	// TODO: added rules for eight-ball
-	if (CueBall* cueBall = m_physicsScene->GetCueBall())
-	{
-		if (cueBall->GetVelocity() == glm::vec2(0))
-		{
-			glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
-			cueBall->SetMousePos(mousePos);
-
-			if (input->isKeyDown(aie::INPUT_KEY_A))
-			{
-				cueBall->AddToCueOffset(.2f);
-			}
-			if (input->isKeyDown(aie::INPUT_KEY_D))
-			{
-				cueBall->AddToCueOffset(-.2f);
-			}
-
-			if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
-			{
-				cueBall->SetHolding(true);
-			}
-
-			if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT))
-			{
-				cueBall->SetHolding(false);
-			}
+			cueBall->SetPosition(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())));
+			cueBall->SetVelocity(glm::vec2(0));
+			cueBall->SetAngularVelocity(0);
 		}
 	}
 
@@ -116,7 +95,16 @@ void EightBallApp::update(float deltaTime) {
 		quit();
 }
 
-void EightBallApp::draw() {
+void EightBallApp::draw() 
+{
+	m_physicsScene->Draw();
+
+	if (m_whiteSunk && !m_inPlay)
+	{
+		aie::Gizmos::add2DAABBFilled(glm::vec2(57.5, 0), glm::vec2(18, 34.8f), glm::vec4(0, .7f, 0, .4f));
+		aie::Input* input = aie::Input::getInstance();
+		aie::Gizmos::add2DCircle(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())), 1.7f, 12, glm::vec4(1, 1, 1, 1));
+	}
 
 	// wipe the screen to the background colour
 	clearScreen();
@@ -124,96 +112,266 @@ void EightBallApp::draw() {
 	// begin drawing sprites
 	m_2dRenderer->begin();
 
+	m_2dRenderer->drawSprite(m_poolTable, getWindowWidth() / 2.f, getWindowHeight() / 2.f, 1050, 580.52f, 0, 0);
+
 	// draw your stuff here!
-	aie::Gizmos::draw2D(glm::ortho<float>(-m_extents, m_extents,
-		-m_extents / m_aspectRatio, m_extents / m_aspectRatio, -1.f, 1.f));
-	
+	for (int i = 0; i < m_billiardballs.size(); i++)
+	{
+		aie::Texture* ballTexture = m_billiardBallTextures[i];
+		glm::vec2 ballPos = WorldToScreen(m_billiardballs[i]->GetSmoothedPosition());
+		float widthandHeight = m_billiardballs[i]->GetRadius() * 12.6f;
+		m_2dRenderer->drawSprite(ballTexture, ballPos.x, ballPos.y, widthandHeight, widthandHeight, 
+			m_billiardballs[i]->GetOrientation(), 0);
+	}
+
 	// output some text, uses the last used colour
 	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 0);
-	m_2dRenderer->drawText(m_font, std::to_string(m_score).c_str(), 0, 30);
 
+	std::string playerText = m_player1Turn ? "Player 1 Turn" : "Player 2 Turn";
+	if (m_firstSunk)
+	{
+		playerText += (m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn) ? ": Solid" : ": Stripe";
+	}
+	m_2dRenderer->drawText(m_font, playerText.c_str(), 600, 0);
+
+	std::string shots = "Shots Left: " + std::to_string(m_shotsLeft);
+	m_2dRenderer->drawText(m_font, shots.c_str(), 1000, 0);
+
+
+	if (!m_inPlay && m_gameOver)
+	{
+		if((m_player1Turn && m_playerWin) || (!m_player1Turn && !m_playerWin))
+			m_2dRenderer->drawText(m_font, "Player 1 Wins", 300, 300);
+		else
+			m_2dRenderer->drawText(m_font, "Player 2 Wins", 300, 300);
+	}
+	
 	// done drawing sprites
 	m_2dRenderer->end();
+
+	aie::Gizmos::draw2D(glm::ortho<float>(-m_extents, m_extents,
+		-m_extents / m_aspectRatio, m_extents / m_aspectRatio, -1.f, 1.f));
+
+	aie::Gizmos::clear();
+	
+}
+
+void EightBallApp::UpdateGameState(aie::Input* input)
+{
+	if (m_inPlay)
+	{
+		if (CueBall* cueBall = m_physicsScene->GetCueBall())
+			cueBall->SetDrawCue(false);
+
+		if (m_physicsScene->AllStationary())
+		{
+			if (m_gameOver)
+			{
+				if (m_whiteSunk || m_foul)
+					m_playerWin = false;
+			}
+			else
+			{
+				m_shotsLeft += m_ballSunk ? 1 : 0;
+				m_shotsLeft--;
+				if (m_foul || m_shotsLeft <= 0)
+				{
+					m_player1Turn = !m_player1Turn;
+					m_shotsLeft = m_foul ? 2 : 1;
+					m_foul = false;
+				}
+			}
+			m_inPlay = false;
+		}
+	}
+
+	if (!m_gameOver && !m_inPlay)
+	{
+		if (CueBall* cueBall = m_physicsScene->GetCueBall())
+		{
+			glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
+			if (m_whiteSunk)
+			{
+				if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) &&
+					mousePos.y < 34.8f && mousePos.y > -34.8f && mousePos.x < 80 && mousePos.x > 30)
+				{
+					cueBall->SetPosition(mousePos);
+					cueBall->SetVelocity(glm::vec2(0));
+					cueBall->SetAngularVelocity(0);
+					m_whiteSunk = false;
+				}
+			}
+			else
+			{
+				cueBall->SetMousePos(mousePos);
+
+				if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
+				{
+					cueBall->SetHolding(true);
+				}
+
+				if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT) && cueBall->IsHolding())
+				{
+					cueBall->SetHolding(false);
+					m_inPlay = true;
+				}
+
+				cueBall->SetDrawCue(true);
+			}
+		}
+	}
+}
+
+void EightBallApp::CheckPockets()
+{
+	for each (PhysicsObject * ball in m_ballsInPockets)
+	{
+		if (CueBall* cueBall = dynamic_cast<CueBall*>(ball))
+		{
+			m_whiteSunk = true;
+			m_foul = true;
+
+			cueBall->SetPosition(glm::vec2(400, 0));
+			cueBall->SetVelocity(glm::vec2(0));
+			cueBall->SetAngularVelocity(0);
+		}
+		else if (BilliardBall* billiardBall = dynamic_cast<BilliardBall*>(ball))
+		{
+			int ballState = billiardBall->GetState();
+			m_ballSunk = true;
+
+			if (!m_firstSunk)
+			{
+				m_player1Solid = (m_player1Turn && ballState == 1) ||
+					(!m_player1Turn && ballState == 2) ? true : false;
+				m_firstSunk = true;
+			}
+
+			if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
+			{
+				if (ballState == 2)
+					m_foul = true;
+			}
+			else
+			{
+				if (ballState == 1)
+					m_foul = true;
+			}
+
+			if (ballState == 1)
+			{
+				m_solidSunk++;
+			}
+			else if (ballState == 2)
+			{
+				m_stripeSunk++;
+			}
+			else
+			{
+				m_gameOver = true;
+				CheckGameOver();
+			}
+
+			billiardBall->SetPosition(glm::vec2(-90 + ((m_solidSunk + m_stripeSunk) * 5), 53));
+			billiardBall->SetKinematic(true);
+		}
+	}
+	m_ballsInPockets.clear();
+}
+
+void EightBallApp::CheckGameOver()
+{
+	if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
+	{
+		m_playerWin = m_solidSunk == 7;
+	}
+	else
+	{
+		m_playerWin = m_stripeSunk == 7;
+	}
 }
 
 void EightBallApp::BoardStartUp()
 {
 	// Walls
-	std::vector<Box*> m_walls;
-	m_walls.push_back(new Box(glm::vec2(-84, 0), glm::vec2(0), 0, 5.f,
-		glm::vec2(4, 35.25f), 0.8f, glm::vec4(1, 1, 1, 1)));
-	m_walls.push_back(new Box(glm::vec2(84, 0), glm::vec2(0), 0, 5.f,
-		glm::vec2(4, 35.25f), 0.3f, glm::vec4(1, 1, 1, 1)));
-	m_walls.push_back(new Box(glm::vec2(40, -44), glm::vec2(0), 0, 5.f,
-		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
-	m_walls.push_back(new Box(glm::vec2(-40, -44), glm::vec2(0), 0, 5.f,
-		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
-	m_walls.push_back(new Box(glm::vec2(40, 44), glm::vec2(0), 0, 5.f,
-		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
-	m_walls.push_back(new Box(glm::vec2(-40, 44), glm::vec2(0), 0, 5.f,
-		glm::vec2(35.25f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
-	for each (Box* wall in m_walls)
+	std::vector<Box*> walls;
+	walls.push_back(new Box(glm::vec2(-77.2f, 0), glm::vec2(0), 0, 5.f,
+		glm::vec2(4, 30.8f), 0.8f, glm::vec4(1, 1, 1, 1)));
+	walls.push_back(new Box(glm::vec2(77.2f, 0), glm::vec2(0), 0, 5.f,
+		glm::vec2(4, 30.8f), 0.3f, glm::vec4(1, 1, 1, 1)));
+	walls.push_back(new Box(glm::vec2(35.9f, -40.4f), glm::vec2(0), 0, 5.f,
+		glm::vec2(31.8f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
+	walls.push_back(new Box(glm::vec2(-35.9f, -40.4f), glm::vec2(0), 0, 5.f,
+		glm::vec2(31.8f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
+	walls.push_back(new Box(glm::vec2(35.9f, 40.4f), glm::vec2(0), 0, 5.f,
+		glm::vec2(31.8f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
+	walls.push_back(new Box(glm::vec2(-35.9f, 40.4f), glm::vec2(0), 0, 5.f,
+		glm::vec2(31.8f, 4), 0.3f, glm::vec4(1, 1, 1, 1)));
+	for each (Box* wall in walls)
 	{
 		m_physicsScene->AddActor(wall);
 		wall->SetKinematic(true);
+		wall->SetHidden(true);
 	}
 	// end Walls
 
 	// Pockets
-	std::vector<Circle*> m_pockets;
-	m_pockets.push_back(new Circle(glm::vec2(-81.5f, 41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	m_pockets.push_back(new Circle(glm::vec2(0, 45.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	m_pockets.push_back(new Circle(glm::vec2(81.5f, 41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	m_pockets.push_back(new Circle(glm::vec2(-81.5, -41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	m_pockets.push_back(new Circle(glm::vec2(0, -45.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	m_pockets.push_back(new Circle(glm::vec2(81.5f, -41.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
-	for each (Circle* pocket in m_pockets)
+	std::vector<Circle*> pockets;
+	pockets.push_back(new Circle(glm::vec2(-75, 38.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	pockets.push_back(new Circle(glm::vec2(0, 42), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	pockets.push_back(new Circle(glm::vec2(75, 38.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	pockets.push_back(new Circle(glm::vec2(-75, -38.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	pockets.push_back(new Circle(glm::vec2(0, -42), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	pockets.push_back(new Circle(glm::vec2(75, -38.5f), glm::vec2(0), 5.0f, 4.75f, 0.8f, glm::vec4(1, 1, 0, 1)));
+	for each (Circle* pocket in pockets)
 	{
 		m_physicsScene->AddActor(pocket);
 		pocket->SetTrigger(true);
+		pocket->SetHidden(true);
 		pocket->triggerEnter = [=](PhysicsObject* other) {
 			m_ballsInPockets.push_back(other);
 		};
 	}
 	// end Pockets
 
-
 	CueBall* cueBall = new CueBall(glm::vec2(40, 0), glm::vec2(0), 3.0f, 1.7f, 0.8f);
-
-
-	Circle* billiardBall1  = new Circle(glm::vec2(-30, 0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall9  = new Circle(glm::vec2(-33.5f, 2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall2  = new Circle(glm::vec2(-33.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall3  = new Circle(glm::vec2(-37, 4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall8  = new Circle(glm::vec2(-37, 0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 0, 1));
-	Circle* billiardBall10  = new Circle(glm::vec2(-37, -4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall11  = new Circle(glm::vec2(-40.5f, 6), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall7  = new Circle(glm::vec2(-40.5f, 2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall14  = new Circle(glm::vec2(-40.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall4 = new Circle(glm::vec2(-40.5f, -6), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall5 = new Circle(glm::vec2(-44, 8), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall13 = new Circle(glm::vec2(-44, 4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall15 = new Circle(glm::vec2(-44, 0), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-	Circle* billiardBall6 = new Circle(glm::vec2(-44, -4), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(1, 0, 0, 1));
-	Circle* billiardBall12 = new Circle(glm::vec2(-44, -8), glm::vec2(0), 5.0f, 2, 0.8f, glm::vec4(0, 0, 1, 1));
-
 	m_physicsScene->AddActor(cueBall);
 
-	m_physicsScene->AddActor(billiardBall1);
-	m_physicsScene->AddActor(billiardBall2);
-	m_physicsScene->AddActor(billiardBall3);
-	m_physicsScene->AddActor(billiardBall4);
-	m_physicsScene->AddActor(billiardBall5);
-	m_physicsScene->AddActor(billiardBall6);
-	m_physicsScene->AddActor(billiardBall7);
-	m_physicsScene->AddActor(billiardBall8);
-	m_physicsScene->AddActor(billiardBall9);
-	m_physicsScene->AddActor(billiardBall10);
-	m_physicsScene->AddActor(billiardBall11);
-	m_physicsScene->AddActor(billiardBall12);
-	m_physicsScene->AddActor(billiardBall13);
-	m_physicsScene->AddActor(billiardBall14);
-	m_physicsScene->AddActor(billiardBall15);
+	// Billiard Balls
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-30, 0), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball1.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-33.5f, 2), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball11.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-33.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball6.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-37, 4), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball2.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-37, 0), glm::vec2(0), 5.0f, 2, 0.8f, 0));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball8.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-37, -4), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball14.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-40.5f, 6), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball12.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-40.5f, 2), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball5.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-40.5f, -2), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball9.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-40.5f, -6), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball3.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, 8), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball7.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, 4), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball10.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, 0), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball13.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, -4), glm::vec2(0), 5.0f, 2, 0.8f, 1));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball4.png"));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, -8), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball15.png"));
+	for each (BilliardBall* ball in m_billiardballs)
+	{
+		m_physicsScene->AddActor(ball);
+	}
 }
 
 float EightBallApp::DegreeToRadian(float degree)
@@ -234,4 +392,19 @@ glm::vec2 EightBallApp::ScreenToWorld(glm::vec2 screenPos)
 	worldPos.y *= 2.0f * m_extents / (m_aspectRatio * getWindowHeight());
 
 	return worldPos;
+}
+
+glm::vec2 EightBallApp::WorldToScreen(glm::vec2 worldPos)
+{
+	glm::vec2 screenPos = worldPos;
+	
+	// scale according to our extents
+	screenPos.x /= 2.0f * m_extents / getWindowWidth();
+	screenPos.y /= 2.0f * m_extents / (m_aspectRatio * getWindowHeight());
+
+	// move the centre of the screen to (0,0)
+	screenPos.x += getWindowWidth() / 2;
+	screenPos.y += getWindowHeight() / 2;
+
+	return screenPos;
 }

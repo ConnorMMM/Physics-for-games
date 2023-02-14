@@ -59,6 +59,7 @@
 
 		bool IsKinematic() { return m_isKinematic; }
 		bool IsTrigger() { return m_isTrigger; }
+		bool IsHidden() { return m_isHidden; }
 
 		// Setters
 		void SetPosition(glm::vec2 position) { m_position = position; }
@@ -74,6 +75,7 @@
 
 		void SetKinematic(bool state) { m_isKinematic = state; }
 		void SetTrigger(bool state) { m_isTrigger = state; }
+		void SetHidden(bool state) { m_isHidden = state; }
 
 	protected:
 		glm::vec2 m_position;
@@ -102,4 +104,6 @@
 		bool m_isTrigger;
 		std::list<PhysicsObject*> m_objectsInside;
 		std::list<PhysicsObject*> m_objectsInsideThisFrame;
+
+		bool m_isHidden;
 	};

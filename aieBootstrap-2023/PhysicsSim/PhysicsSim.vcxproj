@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BilliardBall.h" />
     <ClInclude Include="Box.h" />
     <ClInclude Include="Circle.h" />
     <ClInclude Include="CueBall.h" />
@@ -148,6 +149,7 @@
     <ClInclude Include="Spring.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BilliardBall.cpp" />
     <ClCompile Include="Box.cpp" />
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="CueBall.cpp" />
