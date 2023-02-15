@@ -307,29 +307,6 @@ PhysicsScene::PhysicsScene()
 		return total;
 	}
 
-	CueBall* PhysicsScene::GetCueBall()
-	{
-		for (int i = 0; i < m_actors.size(); i++)
-		{
-			CueBall* cueBall = dynamic_cast<CueBall*>(GetActor(i));
-			if (cueBall)
-				return cueBall;
-		}
-
-		return nullptr;
-	}
-
-	std::vector<BilliardBall*> PhysicsScene::GetBilliardBalls()
-	{
-		std::vector<BilliardBall*> balls;
-		for (int i = 0; i < m_actors.size(); i++)
-		{
-			if (BilliardBall* ball = dynamic_cast<BilliardBall*>(GetActor(i)))
-				balls.push_back(ball);
-		}
-		return balls;
-	}
-
 	bool PhysicsScene::AllStationary()
 	{
 		for (int i = 0; i < m_actors.size(); i++)

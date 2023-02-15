@@ -34,9 +34,7 @@ bool EightBallApp::startup() {
 
 	m_poolTable = new aie::Texture("./textures/pooltable.png");
 
-	// TODO: remember to change this when redistributing a build!
-	// the following path would be used instead: "./font/consolas.ttf"
-	m_font = new aie::Font("../bin/font/consolas.ttf", 32);
+	m_font = new aie::Font("./font/consolas.ttf", 32);
 
 	m_physicsScene = new PhysicsScene();
 	m_physicsScene->SetTimeStep(0.01);
@@ -46,6 +44,7 @@ bool EightBallApp::startup() {
 
 	m_player1Turn = true;
 
+	m_firstBallStruck = nullptr;
 	m_firstSunk = false;
 	m_whiteSunk = false;
 
@@ -81,12 +80,9 @@ void EightBallApp::update(float deltaTime) {
 	// FOR TESTING
 	if (input->isKeyDown(aie::INPUT_KEY_K))
 	{
-		if (CueBall* cueBall = m_physicsScene->GetCueBall())
-		{
-			cueBall->SetPosition(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())));
-			cueBall->SetVelocity(glm::vec2(0));
-			cueBall->SetAngularVelocity(0);
-		}
+		m_cueBall->SetPosition(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())));
+		m_cueBall->SetVelocity(glm::vec2(0));
+		m_cueBall->SetAngularVelocity(0);
 	}
 
 
@@ -100,11 +96,7 @@ void EightBallApp::draw()
 	m_physicsScene->Draw();
 
 	if (m_whiteSunk && !m_inPlay)
-	{
-		aie::Gizmos::add2DAABBFilled(glm::vec2(57.5, 0), glm::vec2(18, 34.8f), glm::vec4(0, .7f, 0, .4f));
-		aie::Input* input = aie::Input::getInstance();
-		aie::Gizmos::add2DCircle(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())), 1.7f, 12, glm::vec4(1, 1, 1, 1));
-	}
+		DrawCueBallPlacement();
 
 	// wipe the screen to the background colour
 	clearScreen();
@@ -112,39 +104,11 @@ void EightBallApp::draw()
 	// begin drawing sprites
 	m_2dRenderer->begin();
 
+	// Gameboard and objects in it
 	m_2dRenderer->drawSprite(m_poolTable, getWindowWidth() / 2.f, getWindowHeight() / 2.f, 1050, 580.52f, 0, 0);
+	DrawBalls();
 
-	// draw your stuff here!
-	for (int i = 0; i < m_billiardballs.size(); i++)
-	{
-		aie::Texture* ballTexture = m_billiardBallTextures[i];
-		glm::vec2 ballPos = WorldToScreen(m_billiardballs[i]->GetSmoothedPosition());
-		float widthandHeight = m_billiardballs[i]->GetRadius() * 12.6f;
-		m_2dRenderer->drawSprite(ballTexture, ballPos.x, ballPos.y, widthandHeight, widthandHeight, 
-			m_billiardballs[i]->GetOrientation(), 0);
-	}
-
-	// output some text, uses the last used colour
-	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 0);
-
-	std::string playerText = m_player1Turn ? "Player 1 Turn" : "Player 2 Turn";
-	if (m_firstSunk)
-	{
-		playerText += (m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn) ? ": Solid" : ": Stripe";
-	}
-	m_2dRenderer->drawText(m_font, playerText.c_str(), 600, 0);
-
-	std::string shots = "Shots Left: " + std::to_string(m_shotsLeft);
-	m_2dRenderer->drawText(m_font, shots.c_str(), 1000, 0);
-
-
-	if (!m_inPlay && m_gameOver)
-	{
-		if((m_player1Turn && m_playerWin) || (!m_player1Turn && !m_playerWin))
-			m_2dRenderer->drawText(m_font, "Player 1 Wins", 300, 300);
-		else
-			m_2dRenderer->drawText(m_font, "Player 2 Wins", 300, 300);
-	}
+	DrawUI();
 	
 	// done drawing sprites
 	m_2dRenderer->end();
@@ -160,8 +124,7 @@ void EightBallApp::UpdateGameState(aie::Input* input)
 {
 	if (m_inPlay)
 	{
-		if (CueBall* cueBall = m_physicsScene->GetCueBall())
-			cueBall->SetDrawCue(false);
+		m_cueBall->SetDrawCue(false);
 
 		if (m_physicsScene->AllStationary())
 		{
@@ -172,6 +135,35 @@ void EightBallApp::UpdateGameState(aie::Input* input)
 			}
 			else
 			{
+				if (!m_foul)
+				{
+					if(BilliardBall* billiardBall = dynamic_cast<BilliardBall*>(m_firstBallStruck))
+					{
+						if (m_firstSunk)
+						{
+							if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
+							{
+								if (billiardBall->GetState() == 2 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
+									m_foul = true;
+							}
+							else
+							{
+								if (billiardBall->GetState() == 1 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
+									m_foul = true;
+							}
+						}
+						else
+						{
+							if (billiardBall->GetState() == 0)
+								m_foul = true;
+						}
+					}
+					else
+					{
+						m_foul = true;
+					}
+				}
+
 				m_shotsLeft += m_ballSunk ? 1 : 0;
 				m_shotsLeft--;
 				if (m_foul || m_shotsLeft <= 0)
@@ -181,43 +173,43 @@ void EightBallApp::UpdateGameState(aie::Input* input)
 					m_foul = false;
 				}
 			}
+
+			m_firstBallStruck = nullptr;
+			m_ballSunk = false;
 			m_inPlay = false;
 		}
 	}
 
 	if (!m_gameOver && !m_inPlay)
 	{
-		if (CueBall* cueBall = m_physicsScene->GetCueBall())
+		glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
+		if (m_whiteSunk)
 		{
-			glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
-			if (m_whiteSunk)
+			if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) &&
+				mousePos.y < 34.8f && mousePos.y > -34.8f && mousePos.x < 80 && mousePos.x > 30)
 			{
-				if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) &&
-					mousePos.y < 34.8f && mousePos.y > -34.8f && mousePos.x < 80 && mousePos.x > 30)
-				{
-					cueBall->SetPosition(mousePos);
-					cueBall->SetVelocity(glm::vec2(0));
-					cueBall->SetAngularVelocity(0);
-					m_whiteSunk = false;
-				}
+				m_cueBall->SetPosition(mousePos);
+				m_cueBall->SetVelocity(glm::vec2(0));
+				m_cueBall->SetAngularVelocity(0);
+				m_whiteSunk = false;
 			}
-			else
+		}
+		else
+		{
+			m_cueBall->SetMousePos(mousePos);
+
+			if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
 			{
-				cueBall->SetMousePos(mousePos);
-
-				if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
-				{
-					cueBall->SetHolding(true);
-				}
-
-				if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT) && cueBall->IsHolding())
-				{
-					cueBall->SetHolding(false);
-					m_inPlay = true;
-				}
-
-				cueBall->SetDrawCue(true);
+				m_cueBall->SetHolding(true);
 			}
+
+			if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT) && m_cueBall->IsHolding())
+			{
+				m_cueBall->SetHolding(false);
+				m_inPlay = true;
+			}
+
+			m_cueBall->SetDrawCue(true);
 		}
 	}
 }
@@ -240,6 +232,20 @@ void EightBallApp::CheckPockets()
 			int ballState = billiardBall->GetState();
 			m_ballSunk = true;
 
+			if (ballState == 1)
+			{
+				m_solidSunk++;
+			}
+			else if (ballState == 2)
+			{
+				m_stripeSunk++;
+			}
+			else
+			{
+				m_gameOver = true;
+				CheckGameOver();
+			}
+
 			if (!m_firstSunk)
 			{
 				m_player1Solid = (m_player1Turn && ballState == 1) ||
@@ -258,20 +264,6 @@ void EightBallApp::CheckPockets()
 					m_foul = true;
 			}
 
-			if (ballState == 1)
-			{
-				m_solidSunk++;
-			}
-			else if (ballState == 2)
-			{
-				m_stripeSunk++;
-			}
-			else
-			{
-				m_gameOver = true;
-				CheckGameOver();
-			}
-
 			billiardBall->SetPosition(glm::vec2(-90 + ((m_solidSunk + m_stripeSunk) * 5), 53));
 			billiardBall->SetKinematic(true);
 		}
@@ -279,8 +271,17 @@ void EightBallApp::CheckPockets()
 	m_ballsInPockets.clear();
 }
 
+/// <summary>
+/// Checks if the current players has sunk all there balls.
+/// </summary>
 void EightBallApp::CheckGameOver()
 {
+	if (!m_firstSunk)
+	{
+		m_playerWin = false;
+		return;
+	}
+
 	if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
 	{
 		m_playerWin = m_solidSunk == 7;
@@ -291,6 +292,10 @@ void EightBallApp::CheckGameOver()
 	}
 }
 
+/// <summary>
+/// This Initilises all the objects/actors in the scene. This includes the walls, 
+/// pockets, billiard balls and the cue ball.
+/// </summary>
 void EightBallApp::BoardStartUp()
 {
 	// Walls
@@ -334,11 +339,17 @@ void EightBallApp::BoardStartUp()
 	}
 	// end Pockets
 
-	CueBall* cueBall = new CueBall(glm::vec2(40, 0), glm::vec2(0), 3.0f, 1.7f, 0.8f);
-	m_physicsScene->AddActor(cueBall);
+	// Cue Ball
+	m_cueBall = new CueBall(glm::vec2(40, 0), glm::vec2(0), 3.0f, 1.7f, 0.8f);
+	m_physicsScene->AddActor(m_cueBall);
+	m_cueBall->collisionCallback = [=](PhysicsObject* other) {
+		if (!m_firstBallStruck)
+			m_firstBallStruck = other;
+	};
+	// end Cue Ball
 
 	// Billiard Balls
-	m_billiardballs.push_back(new BilliardBall(glm::vec2(-30, 0), glm::vec2(0), 5.0f, 2, 0.8f, 2));
+	m_billiardballs.push_back(new BilliardBall(glm::vec2(-30, 0), glm::vec2(0), 5.0f, 2, 0.8f, 1));
 	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball1.png"));
 	m_billiardballs.push_back(new BilliardBall(glm::vec2(-33.5f, 2), glm::vec2(0), 5.0f, 2, 0.8f, 2));
 	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball11.png"));
@@ -372,13 +383,88 @@ void EightBallApp::BoardStartUp()
 	{
 		m_physicsScene->AddActor(ball);
 	}
+	// end Billiard Balls
 }
 
+/// <summary>
+/// Draws the different balls onto the screen
+/// </summary>
+void EightBallApp::DrawBalls()
+{
+	// Billiard Balls
+	for (int i = 0; i < m_billiardballs.size(); i++)
+	{
+		aie::Texture* ballTexture = m_billiardBallTextures[i];
+		glm::vec2 ballPos = WorldToScreen(m_billiardballs[i]->GetSmoothedPosition());
+		float widthandHeight = m_billiardballs[i]->GetRadius() * 12.6f;
+		m_2dRenderer->drawSprite(ballTexture, ballPos.x, ballPos.y, widthandHeight, widthandHeight,
+			m_billiardballs[i]->GetOrientation(), 0);
+	}
+	// Billiard Balls
+
+	
+}
+
+/// <summary>
+/// Draws the area that the cue ball can be placed into after it was sunk. Also 
+/// draws a Gizmo showing where it would be placed.
+/// </summary>
+void EightBallApp::DrawCueBallPlacement()
+{
+	aie::Gizmos::add2DAABBFilled(glm::vec2(57.5, 0), glm::vec2(18, 34.8f), glm::vec4(0, .7f, 0, .4f));
+	aie::Input* input = aie::Input::getInstance();
+	aie::Gizmos::add2DCircle(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())), 
+		1.7f, 12, glm::vec4(1, 1, 1, 1));
+}
+
+void EightBallApp::DrawUI()
+{
+	float windowWidth = getWindowWidth();
+	float windowHeight = getWindowHeight();
+
+	m_2dRenderer->drawText(m_font, "Press ESC to quit", 0, 0);
+
+	std::string playerText = m_player1Turn ? "Player 1 Turn" : "Player 2 Turn";
+	if (m_firstSunk)
+	{
+		playerText += (m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn) ? ": Solid" : ": Stripe";
+	}
+	m_2dRenderer->drawText(m_font, playerText.c_str(), (windowWidth * .5f) - 115, windowHeight - 30);
+
+	std::string shots = "Shots Left: " + std::to_string(m_shotsLeft);
+	m_2dRenderer->drawText(m_font, shots.c_str(), windowWidth - 250, windowHeight - 30);
+
+
+	if (!m_inPlay && m_gameOver)
+		DrawWinState();
+}
+
+/// <summary>
+/// 
+/// </summary>
+void EightBallApp::DrawWinState()
+{
+	if ((m_player1Turn && m_playerWin) || (!m_player1Turn && !m_playerWin))
+		m_2dRenderer->drawText(m_font, "Player 1 Wins", 300, 300);
+	else
+		m_2dRenderer->drawText(m_font, "Player 2 Wins", 300, 300);
+}
+
+/// <summary>
+/// Converts degrees to radians.
+/// </summary>
+/// <param name="degree"> The degree that is to be converted </param>
+/// <returns></returns>
 float EightBallApp::DegreeToRadian(float degree)
 {
 	return degree * (PI / 180.f);
 }
 
+/// <summary>
+/// Converts screen position to world position.
+/// </summary>
+/// <param name="screenPos"> The screen position that it to be converted </param>
+/// <returns></returns>
 glm::vec2 EightBallApp::ScreenToWorld(glm::vec2 screenPos)
 {
 	glm::vec2 worldPos = screenPos;
@@ -393,7 +479,11 @@ glm::vec2 EightBallApp::ScreenToWorld(glm::vec2 screenPos)
 
 	return worldPos;
 }
-
+/// <summary>
+/// Converts world position to screen position.
+/// </summary>
+/// <param name="worldPos"> The world position that it to be converted </param>
+/// <returns></returns>
 glm::vec2 EightBallApp::WorldToScreen(glm::vec2 worldPos)
 {
 	glm::vec2 screenPos = worldPos;

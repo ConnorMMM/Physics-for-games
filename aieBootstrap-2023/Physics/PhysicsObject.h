@@ -1,4 +1,5 @@
 #pragma once
+
 #include <glm/glm.hpp>
 
 enum ShapeType {
@@ -12,8 +13,6 @@ enum ShapeType {
 class PhysicsObject
 {
 protected:
-	PhysicsObject(ShapeType a_shapeID) : m_shapeID(a_shapeID) { m_elasticity = 1; m_color = glm::vec4(1, 1, 1, 1); }
-	PhysicsObject(ShapeType a_shapeID, glm::vec4 a_color) : m_shapeID(a_shapeID), m_color(a_color) { m_elasticity = 1; }
 	PhysicsObject(ShapeType a_shapeID, float elasticity, glm::vec4 a_color) : m_shapeID(a_shapeID), m_color(a_color), m_elasticity(elasticity) {}
 
 public:

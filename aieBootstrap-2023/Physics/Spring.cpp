@@ -4,7 +4,7 @@
 
 Spring::Spring(Rigidbody* body1, Rigidbody* body2, float springCoefficient, float damping, 
 	float restLength, glm::vec2 contact1, glm::vec2 contact2) : 
-	PhysicsObject(JOINT)
+	PhysicsObject(JOINT, 1, glm::vec4(0, 1, 0, 1))
 {
 	m_body1 = body1;
 	m_body2 = body2;
@@ -14,8 +14,6 @@ Spring::Spring(Rigidbody* body1, Rigidbody* body2, float springCoefficient, floa
 
 	m_contact1 = contact1;
 	m_contact2 = contact2;
-
-	m_color = glm::vec4(0, 1, 0, 1);
 
 	if (restLength == 0)
 	{
@@ -61,9 +59,3 @@ void Spring::Draw(float alpha)
 {
 	aie::Gizmos::add2DLine(GetContact1(alpha), GetContact2(alpha), m_color);
 }
-
-void Spring::ResetPosition()
-{
-
-}
-

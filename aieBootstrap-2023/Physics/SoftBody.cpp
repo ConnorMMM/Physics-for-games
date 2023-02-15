@@ -4,6 +4,15 @@
 #include "Circle.h"
 #include "Spring.h"
 
+/// <summary>
+/// Builds a softbody with the provided information.
+/// </summary>
+/// <param name="scene">: The Physics scene that the softbody is to be created for </param>
+/// <param name="position">: The starting position the softbody is built from </param>
+/// <param name="damping">:  </param>
+/// <param name="springForce">: </param>
+/// <param name="spacing">: </param>
+/// <param name="strings">: </param>
 void SoftBody::Build(PhysicsScene* scene, glm::vec2 position, float damping, 
 	float springForce, float spacing, std::vector<std::string>& strings)
 {
@@ -18,7 +27,8 @@ void SoftBody::Build(PhysicsScene* scene, glm::vec2 position, float damping,
 		{
 			if (strings[j][i] == '0')
 			{
-				circles[i * numColumns + j] = new Circle(position + glm::vec2(i, j) * spacing, glm::vec2(0, 0), 1.0f, 2.0f, glm::vec4(1, 0, 0, 1));
+				circles[i * numColumns + j] = new Circle(position + glm::vec2(i, j) * spacing, 
+					glm::vec2(0, 0), 1.0f, 2.0f, 1, glm::vec4(1, 0, 0, 1));
 				scene->AddActor(circles[i * numColumns + j]);
 			}
 			else

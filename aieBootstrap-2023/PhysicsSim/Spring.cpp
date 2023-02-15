@@ -2,34 +2,34 @@
 
 #include <Gizmos.h>
 
-	Spring::Spring(Rigidbody* body1, Rigidbody* body2, float springCoefficient, float damping,
-		float restLength, glm::vec2 contact1, glm::vec2 contact2) :
-		PhysicsObject(JOINT)
+Spring::Spring(Rigidbody* body1, Rigidbody* body2, float springCoefficient, float damping,
+	float restLength, glm::vec2 contact1, glm::vec2 contact2) :
+	PhysicsObject(JOINT, 1, glm::vec4(1))
+{
+	m_body1 = body1;
+	m_body2 = body2;
+	m_springCoefficient = springCoefficient;
+	m_damping = damping;
+	m_restLength = restLength;
+
+	m_contact1 = contact1;
+	m_contact2 = contact2;
+
+	m_color = glm::vec4(0, 1, 0, 1);
+
+	if (restLength == 0)
 	{
-		m_body1 = body1;
-		m_body2 = body2;
-		m_springCoefficient = springCoefficient;
-		m_damping = damping;
-		m_restLength = restLength;
+		if (m_body1) m_body1->CalculateAxes();
+		if (m_body2) m_body2->CalculateAxes();
+		m_restLength = glm::distance(GetContact1(1), GetContact2(1));
+	}
+}
 
-		m_contact1 = contact1;
-		m_contact2 = contact2;
-
-		m_color = glm::vec4(0, 1, 0, 1);
-
-		if (restLength == 0)
-		{
-			if (m_body1) m_body1->CalculateAxes();
-			if (m_body2) m_body2->CalculateAxes();
-			m_restLength = glm::distance(GetContact1(1), GetContact2(1));
-		}
+Spring::~Spring()
+	{
 	}
 
-	Spring::~Spring()
-	{
-	}
-
-	void Spring::FixedUpdate(glm::vec2 gravity, float timeStep)
+void Spring::FixedUpdate(glm::vec2 gravity, float timeStep)
 	{
 		m_body1->CalculateSmoothedPosition(1);
 		m_body2->CalculateSmoothedPosition(1);
@@ -57,12 +57,7 @@
 		m_body2->ApplyForce(force * timeStep, p2 - m_body2->GetPosition());
 	}
 
-	void Spring::Draw(float alpha)
+void Spring::Draw(float alpha)
 	{
 		aie::Gizmos::add2DLine(GetContact1(alpha), GetContact2(alpha), m_color);
-	}
-
-	void Spring::ResetPosition()
-	{
-
 	}

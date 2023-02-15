@@ -2,23 +2,6 @@
 
 #include <Gizmos.h>
 
-Box::Box(glm::vec2 position, glm::vec2 velocity, float mass, glm::vec2 extents, 
-    glm::vec4 color) : Rigidbody(BOX, position, velocity, 0, mass, 1, color)
-{
-    m_extents = extents;
-
-    m_moment = 0.5f * mass * GetWidth() * GetHeight();
-}
-
-Box::Box(glm::vec2 position, glm::vec2 velocity, float mass, glm::vec2 extents,
-	float elasticity, glm::vec4 color) : 
-	Rigidbody(BOX, position, velocity, 0, mass, elasticity, color)
-{
-	m_extents = extents;
-
-	m_moment = 0.5f * mass * GetWidth() * GetHeight();
-}
-
 Box::Box(glm::vec2 position, glm::vec2 velocity, float orientation, float mass, glm::vec2 extents,
 	float elasticity, glm::vec4 color) :
 	Rigidbody(BOX, position, velocity, orientation, mass, elasticity, color)
@@ -34,19 +17,23 @@ Box::~Box()
 
 void Box::Draw(float alpha)
 {
-    CalculateSmoothedPosition(alpha);
-    // draw using local axes
-    glm::vec2 p1 = m_smoothedPosition - m_smoothedLocalX * m_extents.x
-        - m_smoothedLocalY * m_extents.y;
-    glm::vec2 p2 = m_smoothedPosition + m_smoothedLocalX * m_extents.x
-        - m_smoothedLocalY * m_extents.y;
-    glm::vec2 p3 = m_smoothedPosition - m_smoothedLocalX * m_extents.x
-        + m_smoothedLocalY * m_extents.y;
-    glm::vec2 p4 = m_smoothedPosition + m_smoothedLocalX * m_extents.x
-        + m_smoothedLocalY * m_extents.y;
+	CalculateSmoothedPosition(alpha);
 
-    aie::Gizmos::add2DTri(p1, p2, p4, m_color);
-    aie::Gizmos::add2DTri(p1, p4, p3, m_color);
+	if (!m_isHidden)
+	{
+		// draw using local axes
+		glm::vec2 p1 = m_smoothedPosition - m_smoothedLocalX * m_extents.x
+			- m_smoothedLocalY * m_extents.y;
+		glm::vec2 p2 = m_smoothedPosition + m_smoothedLocalX * m_extents.x
+			- m_smoothedLocalY * m_extents.y;
+		glm::vec2 p3 = m_smoothedPosition - m_smoothedLocalX * m_extents.x
+			+ m_smoothedLocalY * m_extents.y;
+		glm::vec2 p4 = m_smoothedPosition + m_smoothedLocalX * m_extents.x
+			+ m_smoothedLocalY * m_extents.y;
+
+		aie::Gizmos::add2DTri(p1, p2, p4, m_color);
+		aie::Gizmos::add2DTri(p1, p4, p3, m_color);
+	}
 }
 
 bool Box::CheckBoxCorners(const Box& box, glm::vec2& contact, int& numContacts, float& pen, glm::vec2& edgeNormal)

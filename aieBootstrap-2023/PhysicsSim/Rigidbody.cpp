@@ -16,6 +16,7 @@
 
 		m_isKinematic = false;
 		m_isTrigger = false;
+		m_isHidden = false;
 	}
 
 	Rigidbody::~Rigidbody()
@@ -76,12 +77,24 @@
 		}
 	}
 
+	/// <summary>
+	/// Applies a given force, calculating the velocity and angular velocity.
+	/// </summary>
+	/// <param name="force">: The direction and magnitude of the force applied </param>
+	/// <param name="pos">: The local position that the force is applied to </param>
 	void Rigidbody::ApplyForce(glm::vec2 force, glm::vec2 pos)
 	{
 		m_velocity += force / GetMass();
 		m_angularVelocity += (force.y * pos.x - force.x * pos.y) / GetMoment();
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="actor2"></param>
+	/// <param name="contact"></param>
+	/// <param name="collisionNormal"></param>
+	/// <param name="pen"></param>
 	void Rigidbody::ResolveCollision(Rigidbody* actor2, glm::vec2 contact,
 		glm::vec2* collisionNormal, float pen)
 	{
@@ -141,6 +154,10 @@
 		}
 	}
 
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="alpha"></param>
 	void Rigidbody::CalculateSmoothedPosition(float alpha)
 	{
 		m_smoothedPosition = alpha * m_position + (1 - alpha) * m_lastPosition;

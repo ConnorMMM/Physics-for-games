@@ -1,4 +1,5 @@
 #pragma once
+
 #include "PhysicsObject.h"
 
 #include <glm/glm.hpp>
@@ -36,28 +37,29 @@ public:
 	std::function<void(PhysicsObject*)> triggerExit;
 
 	// Getters
-	glm::vec2 GetPosition()	  const { return m_position; }
-	glm::vec2 GetLastPosition()		{ return m_lastPosition; }
-	glm::vec2 GetVelocity()			{ return m_velocity; }
-	float GetMass()				{ return m_isKinematic ? INT_MAX : m_mass; }
+	glm::vec2 GetPosition()	const { return m_position; }
+	glm::vec2 GetLastPosition()	{ return m_lastPosition; }
+	glm::vec2 GetVelocity()	{ return m_velocity; }
+	float GetMass()	{ return m_isKinematic ? INT_MAX : m_mass; }
 
-	float	  GetOrientation()		{ return m_orientation; }
-	float	  GetLastOrientation()	{ return m_lastOrientation; }
-	float	  GetAngularVelocity()	{ return m_angularVelocity; }
-	float	  GetMoment()			{ return m_isKinematic ? INT_MAX : m_moment; }
+	float GetOrientation() { return m_orientation; }
+	float GetLastOrientation() { return m_lastOrientation; }
+	float GetAngularVelocity() { return m_angularVelocity; }
+	float GetMoment() { return m_isKinematic ? INT_MAX : m_moment; }
 
 	glm::vec2 GetSmoothedPosition() { return m_smoothedPosition; }
-	glm::vec2 GetSmoothedLocalX()	{ return m_smoothedLocalX; }
-	glm::vec2 GetSmoothedLocalY()	{ return m_smoothedLocalY; }
+	glm::vec2 GetSmoothedLocalX() { return m_smoothedLocalX; }
+	glm::vec2 GetSmoothedLocalY() { return m_smoothedLocalY; }
 
-	glm::vec2 GetLocalX()			{ return m_localX; }
-	glm::vec2 GetLocalY()			{ return m_localY; }
+	glm::vec2 GetLocalX() { return m_localX; }
+	glm::vec2 GetLocalY() { return m_localY; }
 
-	float	  GetLinearDrag()		{ return m_linearDrag; }
-	float	  GetAngularDrag()		{ return m_angularDrag; }
+	float GetLinearDrag() { return m_linearDrag; }
+	float GetAngularDrag() { return m_angularDrag; }
 
 	bool IsKinematic() { return m_isKinematic; }
 	bool IsTrigger() { return m_isTrigger; }
+	bool IsHidden() { return m_isHidden; }
 
 	// Setters
 	void SetPosition(glm::vec2 position) { m_position = position; }
@@ -73,6 +75,7 @@ public:
 
 	void SetKinematic(bool state) { m_isKinematic = state; }
 	void SetTrigger(bool state) { m_isTrigger = state; }
+	void SetHidden(bool state) { m_isHidden = state; }
 
 protected:
 	glm::vec2 m_position;
@@ -84,7 +87,6 @@ protected:
 	float m_lastOrientation;
 	float m_angularVelocity;
 	float m_moment;
-
 
 	glm::vec2 m_smoothedPosition;
 	glm::vec2 m_smoothedLocalX;
@@ -99,6 +101,8 @@ protected:
 
 	bool m_isKinematic;
 	bool m_isTrigger;
+	bool m_isHidden;
+
 	std::list<PhysicsObject*> m_objectsInside;
 	std::list<PhysicsObject*> m_objectsInsideThisFrame;
 };

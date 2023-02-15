@@ -11,8 +11,6 @@
 
 class PhysicsObject;
 class Rigidbody;
-class CueBall;
-class BilliardBall;
 
 	class PhysicsScene
 	{
@@ -40,8 +38,6 @@ class BilliardBall;
 		static bool Box2Box(PhysicsObject*, PhysicsObject*);
 
 		float GetTotalEnergy();
-		CueBall* GetCueBall();
-		std::vector<BilliardBall*> GetBilliardBalls();
 		bool AllStationary();
 
 		// Getters

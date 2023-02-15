@@ -1,10 +1,6 @@
 #include "Rigidbody.h"
 #include "PhysicsScene.h"
 
-#include "Demos.h"
-
-//#include <iostream>
-
 Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity, 
 	float orientation, float mass, float elasticity, glm::vec4 color) : 
 	PhysicsObject(shapeID, elasticity, color)
@@ -20,6 +16,7 @@ Rigidbody::Rigidbody(ShapeType shapeID, glm::vec2 position, glm::vec2 velocity,
 
 	m_isKinematic = false;
 	m_isTrigger = false;
+	m_isHidden = false;
 }
 
 Rigidbody::~Rigidbody()
@@ -80,11 +77,17 @@ void Rigidbody::FixedUpdate(glm::vec2 gravity, float timeStep)
 	}
 }
 
+/// <summary>
+/// Applies a given force, calculating the velocity and angular velocity.
+/// </summary>
+/// <param name="force">: The direction and magnitude of the force applied </param>
+/// <param name="pos">: The local position that the force is applied to </param>
 void Rigidbody::ApplyForce(glm::vec2 force, glm::vec2 pos)
 {
 	m_velocity += force / GetMass();
 	m_angularVelocity += (force.y * pos.x - force.x * pos.y) / GetMoment();
 }
+
 
 void Rigidbody::ResolveCollision(Rigidbody* actor2, glm::vec2 contact,
 	glm::vec2* collisionNormal, float pen)

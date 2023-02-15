@@ -2,14 +2,6 @@
 #include "PhysicsScene.h"
 
 #include <Gizmos.h>
-#include <iostream>
-
-Plane::Plane(glm::vec2 normal, float distance, glm::vec4 color) : 
-    PhysicsObject(PLANE, 1, color)
-{
-	m_normal = normal;
-	m_distanceToOrigin = distance;
-}
 
 Plane::Plane(glm::vec2 normal, float distance, float elasticity, glm::vec4 color) :
 	PhysicsObject(PLANE, elasticity, color)
@@ -41,11 +33,19 @@ void Plane::Draw(float alpha)
     aie::Gizmos::add2DTri(end, end - m_normal * 10.0f, start - m_normal * 10.0f, m_color, colourFade, colourFade);
 }
 
+/// <summary>
+/// Sets the plane's distance from the origin to 0.
+/// </summary>
 void Plane::ResetPosition()
 {
 	m_distanceToOrigin = 0;
 }
 
+/// <summary>
+/// Resolves the collision between the actor and this plane and applies the force to the actor.
+/// </summary>
+/// <param name="actor2"> The object/actor that has come into contact with the plane </param>
+/// <param name="contact"> The point at which the actor and the plane have come into contact </param>
 void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact)
 {
 	// the position at which we'll apply the force relative to the object's COM
@@ -70,8 +70,6 @@ void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact)
 
 	glm::vec2 force = m_normal * j;
 
-	//float kePre = actor2->GetKineticEnergy();
-
 	actor2->ApplyForce(force, contact - actor2->GetPosition());
 
 	if (actor2->collisionCallback)
@@ -79,10 +77,4 @@ void Plane::ResolveCollision(Rigidbody* actor2, glm::vec2 contact)
 
 	float pen = glm::dot(contact, m_normal) - m_distanceToOrigin;
 	PhysicsScene::ApplyContactForces(actor2, nullptr, m_normal, pen);
-
-	//float kePost = actor2->GetKineticEnergy();
-
-	//float deltaKE = kePost - kePre;
-	//if (deltaKE > kePost * 0.01f)
-	//	std::cout << "Kinetic Energy discrepancy greater than 1% detected!!";
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Circle.h"
-#include "Input.h"
 
 class CueBall : public Circle
 {
@@ -13,28 +12,22 @@ public:
 	virtual void FixedUpdate(glm::vec2 gravity, float timeStep);
 	virtual void Draw(float alpha);
 
-	void HoldingCue();
-	void ReleaseCue();
-
-	void AddToCueOffset(float offset);
-	void CueDirFromMousePos(glm::vec2 mousePos);
-
 	// Getter
-	bool GetHoldingCue() { return m_holdingCue; }
+	bool IsHolding() { return m_holding; }
 
 	// Setter
-	void SetCueDir(glm::vec2 cueDir) { m_cueDir = cueDir; }
-	void SetCueOffset(float cueOffset) { m_cueOffset = cueOffset; }
-
-	glm::vec2 ScreenToWorld(glm::vec2 screenPos);
+	void SetHolding(bool state);
+	void SetMousePos(glm::vec2 mousePos);
+	void SetDrawCue(bool state) { m_drawCue = state; }
 
 protected:
+	bool m_holding;
+
+	float m_cuePower;
 	glm::vec2 m_cueDir;
-	float m_cueOffset;
 
-	bool m_holdingCue;
-	float m_cueDistance;
+	float m_currentMouseDis;
+	float m_heldMouseDis;
 
-	aie::Input* m_input;
+	bool m_drawCue;
 };
-

@@ -13,6 +13,7 @@
 class PhysicsScene;
 class PhysicsObject;
 class BilliardBall;
+class CueBall;
 
 class EightBallApp : public aie::Application {
 public:
@@ -34,6 +35,13 @@ public:
 	void BoardStartUp();
 
 
+
+	void DrawBalls();
+	void DrawCueBallPlacement();
+
+	void DrawUI();
+	void DrawWinState();
+
 	float DegreeToRadian(float degree);
 	glm::vec2 ScreenToWorld(glm::vec2 screenPos);
 	glm::vec2 WorldToScreen(glm::vec2 worldPos);
@@ -51,11 +59,13 @@ protected:
 
 	std::vector<BilliardBall*> m_billiardballs;
 	std::vector<aie::Texture*> m_billiardBallTextures;
+	CueBall* m_cueBall;
 
 	const float m_extents = 100;
 	const float m_aspectRatio = 16.0f / 9.0f;
 
 	std::vector<PhysicsObject*> m_ballsInPockets;
+	PhysicsObject* m_firstBallStruck;
 
 	bool m_player1Turn;
 	bool m_player1Solid;
