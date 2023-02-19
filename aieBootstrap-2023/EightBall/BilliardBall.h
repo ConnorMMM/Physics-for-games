@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Circle.h"
-
-#include <string>
+#include <Circle.h>
 
 class BilliardBall : public Circle
 {
@@ -18,5 +16,4 @@ public:
 
 protected:
 	int m_state;
-
 };

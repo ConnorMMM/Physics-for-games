@@ -6,12 +6,10 @@
 
 #include "PhysicsScene.h"
 #include "Circle.h"
+#include "Box.h"
+
 #include "CueBall.h"
 #include "BilliardBall.h"
-#include "Box.h"
-#include "Plane.h"
-#include "Spring.h"
-#include "SoftBody.h"
 
 #include <glm/ext.hpp>
 #include <iostream>
@@ -75,16 +73,14 @@ void EightBallApp::update(float deltaTime) {
 	m_physicsScene->Update(deltaTime);
 
 	CheckPockets();
-	UpdateGameState(input);
 
-	// FOR TESTING
-	if (input->isKeyDown(aie::INPUT_KEY_K))
+	if (m_inPlay)
 	{
-		m_cueBall->SetPosition(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())));
-		m_cueBall->SetVelocity(glm::vec2(0));
-		m_cueBall->SetAngularVelocity(0);
+		m_cueBall->SetDrawCue(false);
+		CheckStillInPlay();
 	}
-
+	else if (!m_gameOver)
+		UpdateCueBall(input);
 
 	// exit the application
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
@@ -120,100 +116,106 @@ void EightBallApp::draw()
 	
 }
 
-void EightBallApp::UpdateGameState(aie::Input* input)
+/// <summary>
+/// Checks if all the balls are stationary (not in play).
+/// </summary>
+void EightBallApp::CheckStillInPlay()
 {
-	if (m_inPlay)
+	if (m_physicsScene->AllStationary())
 	{
-		m_cueBall->SetDrawCue(false);
-
-		if (m_physicsScene->AllStationary())
+		if (m_gameOver)
 		{
-			if (m_gameOver)
+			if (m_whiteSunk || m_foul)
+				m_playerWin = false;
+		}
+		else
+		{
+			if (!m_foul)
 			{
-				if (m_whiteSunk || m_foul)
-					m_playerWin = false;
-			}
-			else
-			{
-				if (!m_foul)
+				if (BilliardBall* billiardBall = dynamic_cast<BilliardBall*>(m_firstBallStruck))
 				{
-					if(BilliardBall* billiardBall = dynamic_cast<BilliardBall*>(m_firstBallStruck))
+					if (m_firstSunk)
 					{
-						if (m_firstSunk)
+						if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
 						{
-							if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
-							{
-								if (billiardBall->GetState() == 2 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
-									m_foul = true;
-							}
-							else
-							{
-								if (billiardBall->GetState() == 1 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
-									m_foul = true;
-							}
+							if (billiardBall->GetState() == 2 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
+								m_foul = true;
 						}
 						else
 						{
-							if (billiardBall->GetState() == 0)
+							if (billiardBall->GetState() == 1 || (billiardBall->GetState() == 0 && m_solidSunk != 7))
 								m_foul = true;
 						}
 					}
 					else
 					{
-						m_foul = true;
+						if (billiardBall->GetState() == 0)
+							m_foul = true;
 					}
 				}
-
-				m_shotsLeft += m_ballSunk ? 1 : 0;
-				m_shotsLeft--;
-				if (m_foul || m_shotsLeft <= 0)
+				else
 				{
-					m_player1Turn = !m_player1Turn;
-					m_shotsLeft = m_foul ? 2 : 1;
-					m_foul = false;
+					m_foul = true;
 				}
 			}
 
-			m_firstBallStruck = nullptr;
-			m_ballSunk = false;
-			m_inPlay = false;
-		}
-	}
-
-	if (!m_gameOver && !m_inPlay)
-	{
-		glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
-		if (m_whiteSunk)
-		{
-			if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) &&
-				mousePos.y < 34.8f && mousePos.y > -34.8f && mousePos.x < 80 && mousePos.x > 30)
+			m_shotsLeft += m_ballSunk ? 1 : 0;
+			m_shotsLeft--;
+			if (m_foul || m_shotsLeft <= 0)
 			{
-				m_cueBall->SetPosition(mousePos);
-				m_cueBall->SetVelocity(glm::vec2(0));
-				m_cueBall->SetAngularVelocity(0);
-				m_whiteSunk = false;
+				m_player1Turn = !m_player1Turn;
+				m_shotsLeft = m_foul ? 2 : 1;
+				m_foul = false;
 			}
 		}
-		else
-		{
-			m_cueBall->SetMousePos(mousePos);
 
-			if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
-			{
-				m_cueBall->SetHolding(true);
-			}
-
-			if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT) && m_cueBall->IsHolding())
-			{
-				m_cueBall->SetHolding(false);
-				m_inPlay = true;
-			}
-
-			m_cueBall->SetDrawCue(true);
-		}
+		m_firstBallStruck = nullptr;
+		m_ballSunk = false;
+		m_inPlay = false;
 	}
 }
 
+/// <summary>
+/// Updates the cue ball on the mouses position and if any of 
+/// the mouse buttons were pressed.
+/// </summary>
+/// <param name="input">: The input scheme </param>
+void EightBallApp::UpdateCueBall(aie::Input* input)
+{
+	glm::vec2 mousePos = ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY()));
+	if (m_whiteSunk)
+	{
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT) &&
+			mousePos.y < 34.8f && mousePos.y > -34.8f && mousePos.x < 71.5 && mousePos.x > 36.5f)
+		{
+			m_cueBall->SetPosition(mousePos);
+			m_cueBall->SetVelocity(glm::vec2(0));
+			m_cueBall->SetAngularVelocity(0);
+			m_whiteSunk = false;
+		}
+	}
+	else
+	{
+		m_cueBall->SetMousePos(mousePos);
+
+		if (input->wasMouseButtonPressed(aie::INPUT_MOUSE_BUTTON_LEFT))
+		{
+			m_cueBall->SetHolding(true);
+		}
+
+		if (input->wasMouseButtonReleased(aie::INPUT_MOUSE_BUTTON_LEFT) && m_cueBall->IsHolding())
+		{
+			m_cueBall->SetHolding(false);
+			m_inPlay = true;
+		}
+
+		m_cueBall->SetDrawCue(true);
+	}
+}
+
+/// <summary>
+/// Checks if any balls where sunk into the pockets.
+/// </summary>
 void EightBallApp::CheckPockets()
 {
 	for each (PhysicsObject * ball in m_ballsInPockets)
@@ -246,22 +248,25 @@ void EightBallApp::CheckPockets()
 				CheckGameOver();
 			}
 
-			if (!m_firstSunk)
+			if (ballState != 0)
 			{
-				m_player1Solid = (m_player1Turn && ballState == 1) ||
-					(!m_player1Turn && ballState == 2) ? true : false;
-				m_firstSunk = true;
-			}
+				if (!m_firstSunk)
+				{
+					m_player1Solid = (m_player1Turn && ballState == 1) ||
+						(!m_player1Turn && ballState == 2) ? true : false;
+					m_firstSunk = true;
+				}
 
-			if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
-			{
-				if (ballState == 2)
-					m_foul = true;
-			}
-			else
-			{
-				if (ballState == 1)
-					m_foul = true;
+				if ((m_player1Solid && m_player1Turn) || (!m_player1Solid && !m_player1Turn))
+				{
+					if (ballState == 2)
+						m_foul = true;
+				}
+				else
+				{
+					if (ballState == 1)
+						m_foul = true;
+				}
 			}
 
 			billiardBall->SetPosition(glm::vec2(-90 + ((m_solidSunk + m_stripeSunk) * 5), 53));
@@ -341,6 +346,7 @@ void EightBallApp::BoardStartUp()
 
 	// Cue Ball
 	m_cueBall = new CueBall(glm::vec2(40, 0), glm::vec2(0), 3.0f, 1.7f, 0.8f);
+	m_cueBallTexture = new aie::Texture("./textures/poolballs/ball16.png");
 	m_physicsScene->AddActor(m_cueBall);
 	m_cueBall->collisionCallback = [=](PhysicsObject* other) {
 		if (!m_firstBallStruck)
@@ -400,9 +406,14 @@ void EightBallApp::DrawBalls()
 		m_2dRenderer->drawSprite(ballTexture, ballPos.x, ballPos.y, widthandHeight, widthandHeight,
 			m_billiardballs[i]->GetOrientation(), 0);
 	}
-	// Billiard Balls
+	// end Billiard Balls
 
-	
+	// Cue Ball
+	glm::vec2 ballPos = WorldToScreen(m_cueBall->GetSmoothedPosition());
+	float widthandHeight = m_cueBall->GetRadius() * 12.6f;
+	m_2dRenderer->drawSprite(m_cueBallTexture, ballPos.x, ballPos.y, widthandHeight, widthandHeight,
+		m_cueBall->GetOrientation(), 0);
+	// end Cue Ball
 }
 
 /// <summary>
@@ -411,12 +422,15 @@ void EightBallApp::DrawBalls()
 /// </summary>
 void EightBallApp::DrawCueBallPlacement()
 {
-	aie::Gizmos::add2DAABBFilled(glm::vec2(57.5, 0), glm::vec2(18, 34.8f), glm::vec4(0, .7f, 0, .4f));
+	aie::Gizmos::add2DAABBFilled(glm::vec2(54, 0), glm::vec2(17.5f, 34.8f), glm::vec4(0, .7f, 0, .4f));
 	aie::Input* input = aie::Input::getInstance();
 	aie::Gizmos::add2DCircle(ScreenToWorld(glm::vec2(input->getMouseX(), input->getMouseY())), 
 		1.7f, 12, glm::vec4(1, 1, 1, 1));
 }
 
+/// <summary>
+/// Draws the UI. Including whose turn it is, how many shots left and who won.
+/// </summary>
 void EightBallApp::DrawUI()
 {
 	float windowWidth = getWindowWidth();
@@ -436,18 +450,12 @@ void EightBallApp::DrawUI()
 
 
 	if (!m_inPlay && m_gameOver)
-		DrawWinState();
-}
-
-/// <summary>
-/// 
-/// </summary>
-void EightBallApp::DrawWinState()
-{
-	if ((m_player1Turn && m_playerWin) || (!m_player1Turn && !m_playerWin))
-		m_2dRenderer->drawText(m_font, "Player 1 Wins", 300, 300);
-	else
-		m_2dRenderer->drawText(m_font, "Player 2 Wins", 300, 300);
+	{
+		if ((m_player1Turn && m_playerWin) || (!m_player1Turn && !m_playerWin))
+			m_2dRenderer->drawText(m_font, "Player 1 Wins", (windowWidth * .5f) - 115, (windowHeight * .5f) - 20);
+		else
+			m_2dRenderer->drawText(m_font, "Player 2 Wins", (windowWidth * .5f) - 115, (windowHeight * .5f) - 20);
+	}
 }
 
 /// <summary>

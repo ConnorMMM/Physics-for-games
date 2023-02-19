@@ -39,12 +39,6 @@
     <ClCompile Include="SoftBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CueBall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BilliardBall.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PhysicsScene.h">
@@ -69,12 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SoftBody.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CueBall.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BilliardBall.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

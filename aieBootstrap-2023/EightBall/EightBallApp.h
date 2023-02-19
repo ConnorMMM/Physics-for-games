@@ -27,14 +27,13 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
-	void UpdateGameState(aie::Input* input);
+	void CheckStillInPlay();
+	void UpdateCueBall(aie::Input* input);
 
 	void CheckPockets();
 	void CheckGameOver();
 
 	void BoardStartUp();
-
-
 
 	void DrawBalls();
 	void DrawCueBallPlacement();
@@ -60,6 +59,7 @@ protected:
 	std::vector<BilliardBall*> m_billiardballs;
 	std::vector<aie::Texture*> m_billiardBallTextures;
 	CueBall* m_cueBall;
+	aie::Texture* m_cueBallTexture;
 
 	const float m_extents = 100;
 	const float m_aspectRatio = 16.0f / 9.0f;

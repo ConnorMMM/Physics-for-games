@@ -37,19 +37,10 @@ void CueBall::Draw(float alpha)
 {
     CalculateSmoothedPosition(alpha);
 
-    aie::Gizmos::add2DCircle(m_smoothedPosition, m_radius, 12, m_color);
-
-    aie::Gizmos::add2DLine(m_smoothedPosition, m_smoothedPosition + m_smoothedLocalX * m_radius, glm::vec4(0, 0, 0, 1));
-
     if (m_drawCue)
     {
-        if (m_holding)
-        {
-            aie::Gizmos::add2DCircle(m_smoothedPosition + (m_cueDir * m_heldMouseDis), 1, 12, m_color);
-        }
-        aie::Gizmos::add2DCircle(m_smoothedPosition + (m_cueDir * m_currentMouseDis), 1, 12, m_color);
         aie::Gizmos::add2DLine(m_smoothedPosition + (-m_cueDir * m_radius), m_smoothedPosition + (-m_cueDir * (m_cuePower * 2.f + m_radius)), glm::vec4(1, 0, 0, 1));
-        aie::Gizmos::add2DLine(m_smoothedPosition, m_smoothedPosition + (-m_cueDir * glm::vec2(50, 50)), m_color);
+        aie::Gizmos::add2DLine(m_smoothedPosition + (-m_cueDir * m_radius), m_smoothedPosition + (-m_cueDir * 50.f), m_color);
     }
 }
 
