@@ -31,11 +31,6 @@ public:
 
 	void TriggerEnter(PhysicsObject* actor2);
 
-	std::function<void(PhysicsObject*)> collisionCallback;
-
-	std::function<void(PhysicsObject*)> triggerEnter;
-	std::function<void(PhysicsObject*)> triggerExit;
-
 	// Getters
 	glm::vec2 GetPosition()	const { return m_position; }
 	glm::vec2 GetLastPosition()	{ return m_lastPosition; }
@@ -76,6 +71,11 @@ public:
 	void SetKinematic(bool state) { m_isKinematic = state; }
 	void SetTrigger(bool state) { m_isTrigger = state; }
 	void SetHidden(bool state) { m_isHidden = state; }
+
+	std::function<void(PhysicsObject*)> collisionCallback;
+
+	std::function<void(PhysicsObject*)> triggerEnter;
+	std::function<void(PhysicsObject*)> triggerExit;
 
 protected:
 	glm::vec2 m_position;

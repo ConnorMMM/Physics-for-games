@@ -20,11 +20,12 @@ public:
 	virtual void Draw(float alpha) = 0;
 	virtual void ResetPosition() {};
 
+	virtual float GetKineticEnergy() = 0;
+	virtual float GetEnergy() = 0;
+
 	// Getter
 	ShapeType GetShapeID() { return m_shapeID; }
 	float GetElasticity() { return m_elasticity; }
-	virtual float GetKineticEnergy() = 0;
-	virtual float GetEnergy() = 0;
 
 	// Setter
 	void SetColor(glm::vec4 color) { m_color = color; }
@@ -34,6 +35,5 @@ protected:
 	ShapeType m_shapeID;
 	float m_elasticity;
 	glm::vec4 m_color;
-
 };
 

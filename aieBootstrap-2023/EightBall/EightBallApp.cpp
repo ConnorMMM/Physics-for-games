@@ -385,7 +385,7 @@ void EightBallApp::BoardStartUp()
 	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball4.png"));
 	m_billiardballs.push_back(new BilliardBall(glm::vec2(-44, -8), glm::vec2(0), 5.0f, 2, 0.8f, 2));
 	m_billiardBallTextures.push_back(new aie::Texture("./textures/poolballs/ball15.png"));
-	for each (BilliardBall* ball in m_billiardballs)
+	for each (BilliardBall * ball in m_billiardballs)
 	{
 		m_physicsScene->AddActor(ball);
 	}

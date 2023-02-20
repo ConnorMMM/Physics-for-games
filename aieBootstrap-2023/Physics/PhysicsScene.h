@@ -18,12 +18,13 @@ public:
 	PhysicsScene();
 	~PhysicsScene();
 
-	void AddActor(PhysicsObject* actor);
-	void RemoveActor(PhysicsObject* actor);
-
 	void Update(float dt);
 	void Draw();
 	void debugScene();
+
+	void AddActor(PhysicsObject* actor);
+	void RemoveActor(PhysicsObject* actor);
+	PhysicsObject* GetActor(int index) { return *(m_actors.begin() + index); }
 
 	void CheckForCollision();
 	static void ApplyContactForces(Rigidbody* body1, Rigidbody* body2, glm::vec2 norm, float pen);
@@ -44,7 +45,6 @@ public:
 	// Getters
 	static glm::vec2 GetGravity() { return m_gravity; }
 	float GetTimeStep() { return m_timeStep; }
-	PhysicsObject* GetActor(int index) { return *(m_actors.begin() + index); }
 
 	// Setters
 	void SetGravity(const glm::vec2 gravity) { m_gravity = gravity; }

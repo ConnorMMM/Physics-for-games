@@ -34,6 +34,5 @@ protected:
 	float m_damping;
 	float m_restLength;
 	float m_springCoefficient; // the restoring force
-
 };
 

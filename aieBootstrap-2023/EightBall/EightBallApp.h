@@ -54,8 +54,6 @@ protected:
 
 	aie::Texture* m_poolTable;
 
-	std::vector<PhysicsObject*> m_physicsObjects;
-
 	std::vector<BilliardBall*> m_billiardballs;
 	std::vector<aie::Texture*> m_billiardBallTextures;
 	CueBall* m_cueBall;
@@ -69,7 +67,6 @@ protected:
 
 	bool m_player1Turn;
 	bool m_player1Solid;
-
 
 	bool m_firstSunk;
 	bool m_whiteSunk;
